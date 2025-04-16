@@ -18,7 +18,7 @@ public class MailService {
             MimeMessage message = mailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(message, "utf-8");
             helper.setText(htmlContent, true);
-            helper.setTo("quoctienha.1509@gmail.com");
+            helper.setTo(to);
             helper.setSubject(subject);
             helper.setFrom("appmusic112@gmail.com");
             mailSender.send(message);

@@ -17,8 +17,7 @@ public interface RegisterCustomerAPI {
     @GET("/verify-email")
     Call<Void> verifyEmail(@Query("token") String token);
 
-//    @GET("/verify-email")
-//    Call<RegisterResponseDTO> verifyEmail(@Query("token") String token);
+//
 
 
 }

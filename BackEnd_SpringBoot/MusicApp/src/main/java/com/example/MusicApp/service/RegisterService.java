@@ -5,21 +5,13 @@ import com.example.MusicApp.DTO.RegisterResponseDTO;
 import com.example.MusicApp.model.Account;
 import com.example.MusicApp.model.Customer;
 import com.example.MusicApp.model.CustomerType;
-import com.example.MusicApp.model.VerificationToken;
 import com.example.MusicApp.repository.AccountRepository;
-import com.example.MusicApp.repository.VerificationTokenRepository;
-import lombok.AllArgsConstructor;
-import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.mail.SimpleMailMessage;
-import org.springframework.mail.javamail.JavaMailSender;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
-import java.util.UUID;
+
 
 @Service
 @RequiredArgsConstructor
@@ -78,7 +70,7 @@ public class RegisterService {
         // Lưu đối tượng User (Account sẽ được lưu tự động nhờ CascadeType.ALL)
         accountRepo.save(acc);
         verifyEmailService.sendVerificationEmail(acc);
-        mailService.send("quoctienha.1509@gmail.com", "Test Email", "content");
+        //mailService.send("quoctienha.1509@gmail.com", "Test Email", "content");
 
         registerResponseDTO.setMessage("Đăng ký thành công.Vui lòng kiểm tra email để xác thực!");
         return registerResponseDTO;

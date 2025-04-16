@@ -41,6 +41,7 @@
                     android:pathPrefix="/verify-email" />
             </intent-filter>
         </activity>
+
     </application>
 
 </manifest>
