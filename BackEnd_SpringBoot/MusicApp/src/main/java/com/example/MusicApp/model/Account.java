@@ -3,6 +3,7 @@ package com.example.MusicApp.model;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 
@@ -16,6 +17,7 @@ public class Account {
     private String username;
     private String password;
     private String email;
+    @Getter
     private boolean enabled;
 
     @OneToOne(cascade = CascadeType.ALL)

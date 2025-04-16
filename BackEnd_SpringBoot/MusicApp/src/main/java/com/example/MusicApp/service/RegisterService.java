@@ -1,6 +1,7 @@
 package com.example.MusicApp.service;
 
 import com.example.MusicApp.DTO.RegisterRequestDTO;
+import com.example.MusicApp.DTO.RegisterResponseDTO;
 import com.example.MusicApp.model.Account;
 import com.example.MusicApp.model.Customer;
 import com.example.MusicApp.model.CustomerType;
@@ -26,28 +27,39 @@ public class RegisterService {
 
     private final AccountRepository accountRepo;
     private final PasswordEncoder passwordEncoder;
-    //private VerificationTokenRepository tokenRepo;
-    //private JavaMailSender mailSender;
+    private final RegisterResponseDTO registerResponseDTO = new RegisterResponseDTO();;
 
-    public void registerCustomer(RegisterRequestDTO req){
+    @Autowired
+    private VerifyEmailService verifyEmailService;
 
+    @Autowired
+    MailService mailService;
+
+
+    public RegisterResponseDTO registerCustomer(RegisterRequestDTO req){
+
+        registerResponseDTO.setStatus("Failed");
         //Kiểm tra password và confirmPassword có khớp không
         if (!req.getPassword().equals(req.getConfirmPassword())){
-            throw new RuntimeException("Password không khớp.");
+            registerResponseDTO.setMessage("Password không khớp.");
+            return registerResponseDTO;
         }
 
         // Kiểm tra username đã tồn tại
         if (accountRepo.findByUsername(req.getUsername()).isPresent()) {
-            throw new IllegalArgumentException("Username đã tồn tại!");
+            registerResponseDTO.setMessage("Username đã tồn tại!");
+            return registerResponseDTO;
         }
 
         // Kiểm tra email đã tồn tại
         if (accountRepo.findByEmail(req.getEmail()).isPresent()) {
-            throw new IllegalArgumentException("Email đã tồn tại!");
+            registerResponseDTO.setMessage("Email đã tồn tại!");
+            return registerResponseDTO;
         }
 
 
 
+        registerResponseDTO.setStatus("Success");
         // tạo Customer
         Customer customer = new Customer();
         customer.setFullName(null);
@@ -57,6 +69,7 @@ public class RegisterService {
         Account acc = new Account();
         acc.setUsername(req.getUsername());
         acc.setEmail(req.getEmail());
+        acc.setEnabled(false);
         acc.setPassword(passwordEncoder.encode(req.getPassword()));
 
         customer.setAccount(acc);  // Liên kết User với Account
@@ -64,58 +77,14 @@ public class RegisterService {
 
         // Lưu đối tượng User (Account sẽ được lưu tự động nhờ CascadeType.ALL)
         accountRepo.save(acc);
+        verifyEmailService.sendVerificationEmail(acc);
+        mailService.send("quoctienha.1509@gmail.com", "Test Email", "content");
+
+        registerResponseDTO.setMessage("Đăng ký thành công.Vui lòng kiểm tra email để xác thực!");
+        return registerResponseDTO;
 
     }
 
-//    public void register(RegisterRequestDTO req) {
-//
-//        if (!req.getPassword().equals(req.getConfirmPassword())){
-//            throw new RuntimeException("Password không khớp.");
-//        }
-//
-//        Account acc = new Account();
-//        acc.setUsername(req.getUsername());
-//        acc.setEmail(req.getEmail());
-//        acc.setPassword(encoder.encode(req.getPassword()));
-//        accountRepo.save(acc);
-//
-//        // tạo user con Customer
-//        Customer cust = new Customer();
-//        cust.setFullName("");
-//        cust.setPhone("");
-//        cust.setMembership(CustomerType.NORMAL);
-//        cust.setAccount(acc);
-//        // lưu User qua cascade
-//
-//        // tạo và lưu token
-//        String token = UUID.randomUUID().toString();
-//        VerificationToken vt = new VerificationToken();
-//        vt.setToken(token);
-//        vt.setAccount(acc);
-//        vt.setExpiryDate(LocalDateTime.now().plusHours(24));
-//        tokenRepo.save(vt);
-//
-//        sendVerificationEmail(acc.getEmail(), token);
-//    }
-//
-//    public void verifyToken(String token) {
-//        VerificationToken vt = tokenRepo.findByToken(token)
-//                .orElseThrow(() -> new RuntimeException("Token không hợp lệ"));
-//        if (vt.getExpiryDate().isBefore(LocalDateTime.now())){
-//            throw new RuntimeException("Token đã hết hạn");
-//        }
-//        Account acc = vt.getAccount();
-//        acc.setEnabled(true);
-//        accountRepo.save(acc);
-//        tokenRepo.delete(vt);
-//    }
-//
-//    private void sendVerificationEmail(String toEmail, String token) {
-//        String link = "app.client.url" + "?token=" + token;
-//        SimpleMailMessage msg = new SimpleMailMessage();
-//        msg.setTo(toEmail);
-//        msg.setSubject("Xác thực tài khoản");
-//        msg.setText("Nhấn vào link để xác thực: " + link);
-//        mailSender.send(msg);
-//    }
+
+
 }

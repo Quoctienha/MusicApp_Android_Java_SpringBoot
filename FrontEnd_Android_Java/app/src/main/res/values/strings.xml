@@ -1,3 +1,12 @@
 <resources>
     <string name="app_name">MusicApp</string>
+    <string name="form_register">Đăng ký tài khoản</string>
+    <string name="form_register_username">Tên người dùng</string>
+    <string name="form_register_email">Email</string>
+    <string name="form_register_password">Mật khẩu</string>
+    <string name="form_register_confirmPass">Nhập lại mật khẩu</string>
+    <string name="form_register_btnRegister">Đăng ký</string>
+    <string name="form_verifyEmail_btnResend">Thử lại</string>
+    <string name="form_verifyEmail_Loading">Đang xác thực email...</string>
+
 </resources>
