@@ -11,7 +11,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
-public class CleanupService {
+public class CleanupAccountService {
     @Autowired
     private VerificationTokenRepository tokenRepo;
 

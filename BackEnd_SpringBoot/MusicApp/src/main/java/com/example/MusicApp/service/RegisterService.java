@@ -24,9 +24,6 @@ public class RegisterService {
     @Autowired
     private VerifyEmailService verifyEmailService;
 
-    @Autowired
-    MailService mailService;
-
 
     public RegisterResponseDTO registerCustomer(RegisterRequestDTO req){
 
@@ -70,7 +67,6 @@ public class RegisterService {
         // Lưu đối tượng User (Account sẽ được lưu tự động nhờ CascadeType.ALL)
         accountRepo.save(acc);
         verifyEmailService.sendVerificationEmail(acc);
-        //mailService.send("quoctienha.1509@gmail.com", "Test Email", "content");
 
         registerResponseDTO.setMessage("Đăng ký thành công.Vui lòng kiểm tra email để xác thực!");
         return registerResponseDTO;

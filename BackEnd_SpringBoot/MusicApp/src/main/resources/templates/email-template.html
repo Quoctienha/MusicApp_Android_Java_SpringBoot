@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <style>
+        body { font-family: Arial, sans-serif; font-size: 16px; line-height: 1.6; margin: 0; padding: 0; }
+        .email-container { width: 100%; max-width: 600px; margin: 0 auto; padding: 20px; }
+        .email-header { text-align: center; font-size: 20px; font-weight: bold; }
+        .email-body { padding: 10px; }
+        .email-footer { font-size: 14px; text-align: center; color: #888; }
+        a.button { display: inline-block; padding: 10px 20px; background-color: #4CAF50; color: white; text-decoration: none; border-radius: 5px; font-weight: bold; text-align: center;}
+    </style>
+</head>
+<body>
+<div class="email-container">
+    <div class="email-header">
+        <p>Chào <span th:text="${username}">User</span>,</p>
+    </div>
+    <div class="email-body">
+        <p>Vui lòng xác thực tài khoản của bạn bằng cách nhấn vào liên kết dưới đây trong vòng 5 phút:</p>
+        <p><a th:href="${link}" class="button">Xác thực tài khoản</a></p>
+    </div>
+    <div class="email-footer">
+        <p>Nếu không phải bạn yêu cầu, vui lòng bỏ qua.</p>
+    </div>
+</div>
+</body>
+</html>
