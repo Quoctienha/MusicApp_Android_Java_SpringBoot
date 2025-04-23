@@ -18,14 +18,23 @@ public class CleanupService {
     @Autowired
     private AccountRepository accountRepo;
 
-    @Scheduled(fixedRate = 60000) // mỗi phút
+    @Scheduled(fixedRate = 60000)
     public void deleteExpiredAccounts() {
-        List<VerificationToken> expired = tokenRepo.findAllByExpiryDateBefore(LocalDateTime.now());
-        for (VerificationToken token : expired) {
-            if (!token.getAccount().isEnabled()) {
-                accountRepo.delete(token.getAccount());
-                tokenRepo.delete(token);
+        try {
+            System.out.println("Running cleanup job at " + LocalDateTime.now());
+            List<VerificationToken> expired = tokenRepo.findAllByExpiryDateBefore(LocalDateTime.now());
+            System.out.println("Found " + expired.size() + " expired tokens");
+            for (VerificationToken token : expired) {
+                if (!token.getAccount().isEnabled()) {
+                    System.out.println("Deleting account: " + token.getAccount().getId());
+                    tokenRepo.delete(token);
+                    accountRepo.delete(token.getAccount());
+
+                }
             }
+        } catch (Exception e) {
+            e.printStackTrace(); // or log with a logger
         }
     }
+
 }

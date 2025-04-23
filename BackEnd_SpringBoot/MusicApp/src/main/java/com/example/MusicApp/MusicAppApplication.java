@@ -2,12 +2,14 @@ package com.example.MusicApp;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
+import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.ComponentScan;
 
 @SpringBootApplication //(scanBasePackages = "com.example.MusicApp")
 @ComponentScan(basePackages = "com.example.MusicApp") // bảo đảm nó quét cả package con
 @EnableAutoConfiguration
+@EnableScheduling
 public class MusicAppApplication {
 
 	public static void main(String[] args) {

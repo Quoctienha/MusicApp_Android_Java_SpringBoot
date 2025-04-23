@@ -25,7 +25,7 @@ public class VerifyEmailService {
 
     public void sendVerificationEmail(Account account) {
         String token =  UUID.randomUUID().toString();
-        LocalDateTime expiry = LocalDateTime.now().plusMinutes(5);
+        LocalDateTime expiry = LocalDateTime.now().plusMinutes(1);
         //tạo token
         VerificationToken verificationToken = new VerificationToken();
         verificationToken.setToken(token);
@@ -34,7 +34,7 @@ public class VerifyEmailService {
         tokenRepo.save(verificationToken);
 
 
-        String link = "http://192.168.1.2:8080/verify-email?token=" + token;
+        String link = "http://10.0.41.86:8080/verify-email?token=" + token;
         String subject = "Xác thực tài khoản Music App";
         String htmlContent = buildEmail(account.getUsername(), link);
 
