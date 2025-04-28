@@ -19,7 +19,7 @@ public class RegisterService {
 
     private final AccountRepository accountRepo;
     private final PasswordEncoder passwordEncoder;
-    private final RegisterResponseDTO registerResponseDTO = new RegisterResponseDTO();;
+    private final RegisterResponseDTO registerResponseDTO = new RegisterResponseDTO();
 
     @Autowired
     private VerifyEmailService verifyEmailService;
@@ -30,19 +30,19 @@ public class RegisterService {
         registerResponseDTO.setStatus("Failed");
         //Kiểm tra password và confirmPassword có khớp không
         if (!req.getPassword().equals(req.getConfirmPassword())){
-            registerResponseDTO.setMessage("Password không khớp.");
+            registerResponseDTO.setMessage("Password doesn't match.");
             return registerResponseDTO;
         }
 
         // Kiểm tra username đã tồn tại
         if (accountRepo.findByUsername(req.getUsername()).isPresent()) {
-            registerResponseDTO.setMessage("Username đã tồn tại!");
+            registerResponseDTO.setMessage("Username not available!");
             return registerResponseDTO;
         }
 
         // Kiểm tra email đã tồn tại
         if (accountRepo.findByEmail(req.getEmail()).isPresent()) {
-            registerResponseDTO.setMessage("Email đã tồn tại!");
+            registerResponseDTO.setMessage("Email not available!");
             return registerResponseDTO;
         }
 
@@ -59,6 +59,7 @@ public class RegisterService {
         acc.setUsername(req.getUsername());
         acc.setEmail(req.getEmail());
         acc.setEnabled(false);
+        acc.setRefreshToken(null);
         acc.setPassword(passwordEncoder.encode(req.getPassword()));
 
         customer.setAccount(acc);  // Liên kết User với Account
@@ -68,7 +69,7 @@ public class RegisterService {
         accountRepo.save(acc);
         verifyEmailService.sendVerificationEmail(acc);
 
-        registerResponseDTO.setMessage("Đăng ký thành công.Vui lòng kiểm tra email để xác thực!");
+        registerResponseDTO.setMessage("Register successfully.Please check your email for email verification!");
         return registerResponseDTO;
 
     }

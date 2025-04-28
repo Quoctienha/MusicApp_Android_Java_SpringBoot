@@ -19,6 +19,7 @@ public class Account {
     private String email;
     @Getter
     private boolean enabled;
+    private String refreshToken;
 
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "user_id") // Tạo khóa ngoại tới bảng User

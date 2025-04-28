@@ -38,10 +38,10 @@
 
     <!-- Trường nhập Username -->
     <EditText
-        android:id="@+id/etUsername"
+        android:id="@+id/edtUsername"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="@string/enter_your_username_or_email"
+        android:hint="@string/enter_your_username"
         android:padding="12dp"
         android:background="@drawable/edit_text_background"
         android:layout_marginBottom="16dp"/>
@@ -70,7 +70,7 @@
         android:layout_marginBottom="16dp">
 
         <EditText
-            android:id="@+id/etPassword"
+            android:id="@+id/edtPassword"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="@string/enter_your_password"
@@ -78,23 +78,23 @@
             android:padding="12dp"
             android:background="@drawable/edit_text_background"/>
 
-        <ImageView
-            android:id="@+id/imageViewTogglePassword"
-            android:layout_width="24dp"
-            android:layout_height="24dp"
+        <ImageButton
+            android:id="@+id/btnTogglePassword"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
             android:layout_alignParentEnd="true"
             android:layout_centerVertical="true"
             android:layout_marginEnd="12dp"
-            android:src="@android:drawable/ic_menu_view"
+            android:src="@drawable/ic_eye"
             android:contentDescription="Toggle Password Visibility"/>
     </RelativeLayout>
 
     <!-- Nút Sign In -->
     <Button
-        android:id="@+id/btnRegister"
+        android:id="@+id/btnLogin"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="LOG IN"
+        android:text="@string/log_in"
         android:backgroundTint="#33CC00"
         android:textColor="@android:color/black"
         android:padding="12dp"
@@ -105,7 +105,7 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="------- Or With -------"
+        android:text="@string/or_with"
         android:textColor="@android:color/white"
         android:layout_gravity="center"
         android:layout_marginBottom="16dp"/>

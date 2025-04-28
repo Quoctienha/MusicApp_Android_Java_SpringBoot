@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -33,7 +34,7 @@ public class VerifyEmailService {
         tokenRepo.save(verificationToken);
 
 
-        String link = "http://192.168.1.19:8080/verify-email?token=" + token;
+        String link = "http://192.168.1.2:8080/verify-email?token=" + token;
         String subject = "Xác thực tài khoản Music App";
 
         mailService.send(account.getEmail(), subject, account.getUsername(), link);
@@ -41,8 +42,13 @@ public class VerifyEmailService {
 
     public boolean confirmToken(String token) {
 
-        VerificationToken vt = tokenRepo.findByToken(token)
-                .orElseThrow(() -> new RuntimeException("Token không tồn tại."));
+        Optional<VerificationToken> optionalToken = tokenRepo.findByToken(token);
+
+        if (optionalToken.isEmpty()) {
+            return false; // Không tìm thấy token thì trả về false
+        }
+
+        VerificationToken vt = optionalToken.get();
 
         if (vt.getExpiryDate().isBefore(LocalDateTime.now())) {
             accountRepo.delete(vt.getAccount());

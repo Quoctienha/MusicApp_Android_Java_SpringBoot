@@ -1,4 +1,4 @@
-package com.example.musicapp.retrofit;
+package com.example.musicapp.api;
 
 import com.example.musicapp.dto.RegisterRequestDTO;
 import com.example.musicapp.dto.RegisterResponseDTO;
@@ -11,13 +11,11 @@ import retrofit2.http.Query;
 
 public interface RegisterCustomerAPI {
 
-    @POST("/register-customer")
+    @POST("/api/auth/register-customer")
     Call<RegisterResponseDTO> registerCustomer(@Body RegisterRequestDTO request);
 
-    @GET("/verify-email")
-    Call<Void> verifyEmail(@Query("token") String token);
-
-//
+//    @GET("/api/auth/verify-email")
+//    Call<Void> verifyEmail(@Query("token") String token);
 
 
 }

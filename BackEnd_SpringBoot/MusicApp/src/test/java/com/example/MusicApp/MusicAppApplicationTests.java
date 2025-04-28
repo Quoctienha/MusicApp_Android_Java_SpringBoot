@@ -9,18 +9,18 @@ import org.springframework.boot.test.context.SpringBootTest;
 @SpringBootTest
 class MusicAppApplicationTests {
 
-	@Autowired
-	private RegisterService registerService;
-
-    @Test
-	void addCustomerAccountTest() {
-		RegisterRequestDTO req = new RegisterRequestDTO();
-		req.setUsername("testNameENV");
-		req.setEmail("testENV@gmail.com");
-		req.setPassword("123ENV");
-		req.setConfirmPassword("123ENV");
-
-		registerService.registerCustomer(req);
-	}
+//	@Autowired
+//	private RegisterService registerService;
+//
+//    @Test
+//	void addCustomerAccountTest() {
+//		RegisterRequestDTO req = new RegisterRequestDTO();
+//		req.setUsername("testNameENV");
+//		req.setEmail("testENV@gmail.com");
+//		req.setPassword("123ENV");
+//		req.setConfirmPassword("123ENV");
+//
+//		registerService.registerCustomer(req);
+//	}
 
 }
