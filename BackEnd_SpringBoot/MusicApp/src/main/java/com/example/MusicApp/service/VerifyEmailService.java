@@ -34,7 +34,7 @@ public class VerifyEmailService {
         tokenRepo.save(verificationToken);
 
 
-        String link = "http://192.168.1.2:8080/verify-email?token=" + token;
+        String link = "http://192.168.3.20:8080/api/auth/verify-email?token=" + token;
         String subject = "Xác thực tài khoản Music App";
 
         mailService.send(account.getEmail(), subject, account.getUsername(), link);
