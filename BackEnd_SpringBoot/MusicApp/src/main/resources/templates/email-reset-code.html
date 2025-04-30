@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <style>
+    body { font-family: Arial, sans-serif; }
+    .container { padding: 20px; max-width: 600px; margin: auto; }
+    .code { font-size: 24px; font-weight: bold; background-color: #eee; padding: 10px; text-align: center; border-radius: 5px; }
+  </style>
+</head>
+<body>
+<div class="container">
+  <p>Xin chào <span th:text="${username}">User</span>,</p>
+  <p>Bạn đã yêu cầu đặt lại mật khẩu. Dưới đây là mã xác thực của bạn:</p>
+  <div class="code" th:text="${code}">123456</div>
+  <p>Mã sẽ hết hạn sau 5 phút.</p>
+  <p>Nếu bạn không thực hiện yêu cầu này, vui lòng bỏ qua email.</p>
+</div>
+</body>
+</html>

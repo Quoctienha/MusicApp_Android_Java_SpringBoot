@@ -16,23 +16,21 @@
         android:usesCleartextTraffic="true"
         android:theme="@style/Theme.MusicApp"
         tools:targetApi="31">
-        <activity
-            android:name=".MainActivity"
-            android:exported="true">
+
+        <activity android:name=".MainActivity" android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
 
-
-
         <activity android:name=".activity.RegisterActivity" />
         <activity android:name=".activity.LoginActivity" />
         <activity android:name=".activity.HomeActivity" />
-
-
+        <activity android:name=".activity.ForgotPasswordActivity" /> <!-- ✅ Add this -->
+        <activity android:name=".activity.ResetPasswordActivity" />
 
     </application>
+
 
 </manifest>
