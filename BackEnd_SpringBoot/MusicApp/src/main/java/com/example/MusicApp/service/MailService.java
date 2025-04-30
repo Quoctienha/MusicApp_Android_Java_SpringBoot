@@ -21,18 +21,15 @@ public class MailService {
     // ✅ For account verification using link
     public void send(String to, String subject, String username, String link) {
         try {
-            // Thiết lập context cho template
             Context context = new Context();
             context.setVariable("username", username);
             context.setVariable("link", link);
 
-            // Tạo nội dung email từ template Thymeleaf
             String htmlContent = templateEngine.process("email-template", context);
 
-            // Tạo MimeMessage
             MimeMessage message = mailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(message, "utf-8");
-            helper.setText(htmlContent, true);  // true để gửi email dưới dạng HTML
+            helper.setText(htmlContent, true);
             helper.setTo(to);
             helper.setSubject(subject);
             helper.setFrom("appmusic112@gmail.com");
@@ -45,7 +42,7 @@ public class MailService {
         }
     }
 
-    // ✅ For password reset using a codr
+    // ✅ For password reset using a code
     public void sendResetCodeEmail(String to, String subject, String username, String code) {
         try {
             System.out.println("Sending reset code to: " + to);
@@ -53,9 +50,9 @@ public class MailService {
 
             Context context = new Context();
             context.setVariable("username", username);
-            context.setVariable("code", code); // Must match th:text="${code}" in your HTML
+            context.setVariable("code", code);
 
-            String htmlContent = templateEngine.process("email-reset-code", context); // Use correct template
+            String htmlContent = templateEngine.process("email-reset-code", context);
 
             MimeMessage message = mailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(message, "utf-8");
@@ -64,7 +61,6 @@ public class MailService {
             helper.setSubject(subject);
             helper.setFrom("appmusic112@gmail.com");
 
-            // Gửi email
             mailSender.send(message);
             System.out.println("Reset code email sent to " + to);
 
