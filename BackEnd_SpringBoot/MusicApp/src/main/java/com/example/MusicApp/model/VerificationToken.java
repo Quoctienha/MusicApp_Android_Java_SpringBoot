@@ -23,6 +23,4 @@ public class VerificationToken {
 
     private LocalDateTime expiryDate;
 
-
-
 }
