@@ -11,6 +11,8 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.Toast;
+import android.widget.TextView;
+
 
 import com.example.musicapp.MainActivity;
 import com.example.musicapp.R;
@@ -43,6 +45,13 @@ public class LoginActivity extends AppCompatActivity {
         Button btnGoToSignUp = findViewById(R.id.btnGoToSignUp);
         btnTogglePassword = findViewById(R.id.btnTogglePassword);
         tokenManager = new TokenManager(this);
+        TextView tvForgotPassword = findViewById(R.id.tvForgotPassword);
+
+        tvForgotPassword.setOnClickListener(v -> {
+            // Start the ForgotPasswordActivity
+            Intent intent = new Intent(LoginActivity.this, ForgotPasswordActivity.class);
+            startActivity(intent);
+        });
 
         // Xử lý sự kiện nút đăng nhập
         btnLogin.setOnClickListener(v -> login());
