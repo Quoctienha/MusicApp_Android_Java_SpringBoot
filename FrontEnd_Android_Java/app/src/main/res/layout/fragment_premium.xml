@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@drawable/premium_background"
+    android:gravity="center"
+    android:padding="16dp">
+
+    <!-- Gradient Background -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:gravity="center"
+        android:padding="16dp">
+
+        <!-- Title: "Mua Music Premium..." -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Mua Gói Premium\nđể nghe nhạc không có\nquảng cáo, không cần\nmạng và cả khi tắt màn\nhình"
+            android:textSize="24sp"
+            android:textColor="#FFFFFF"
+            android:textStyle="bold"
+            android:gravity="center"
+            android:layout_marginBottom="24dp"/>
+
+        <!-- Description: "Dùng thử 1 tháng..." -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Dùng thử 1 tháng với giá 0 đ • Sau đó là\n65.000 đ/tháng • Không bao gồm thuế\nGTGT • Hủy bất cứ lúc nào"
+            android:textSize="16sp"
+            android:textColor="#BBBBBB"
+            android:gravity="center"
+            android:layout_marginBottom="24dp" />
+
+        <!-- Button: "Dùng thử 1 tháng với giá 0 đ" -->
+        <!-- Button: "Dùng thử 1 tháng với giá 0 đ" -->
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/btn_try_premium"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Dùng thử 1 tháng với giá 0 đ"
+            android:textSize="16sp"
+            android:background="@drawable/premium_button_background"
+            android:backgroundTint="#007AFF"
+            android:textColor="#FFFFFF"
+            android:paddingHorizontal="24dp"
+            android:paddingVertical="12dp"
+            android:layout_marginBottom="16dp" />
+
+        <!-- Fine print: "Hoặc tiết kiệm..." -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Hoặc tiết kiệm tiền bằng gói dành cho gia đình hoặc sinh viên"
+            android:textSize="12sp"
+            android:textColor="#BBBBBB"
+            android:gravity="center" />
+    </LinearLayout>
+
+</LinearLayout>

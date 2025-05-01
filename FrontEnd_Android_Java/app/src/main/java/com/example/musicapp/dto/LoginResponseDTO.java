@@ -4,6 +4,7 @@ public class LoginResponseDTO {
     private String accessToken;
     private String refreshToken;
     private String message;
+    private String email;
 
     public String getAccessToken() {
         return accessToken;
@@ -15,6 +16,8 @@ public class LoginResponseDTO {
         return message;
     }
 
-
+    public String getEmail() {
+        return email;
+    }
 
 }

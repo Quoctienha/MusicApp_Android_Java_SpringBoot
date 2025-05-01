@@ -43,7 +43,7 @@ public class ForgotPasswordActivity extends AppCompatActivity {
 
             new Thread(() -> {
                 try {
-                    URL url = new URL("http://192.168.0.11:8080/api/auth/send-code");
+                    URL url = new URL("http://192.168.3.20:8080/api/auth/send-code");
                     HttpURLConnection conn = (HttpURLConnection) url.openConnection();
                     conn.setRequestMethod("POST");
                     conn.setRequestProperty("Content-Type", "application/json");
@@ -90,7 +90,7 @@ public class ForgotPasswordActivity extends AppCompatActivity {
 
         new Thread(() -> {
             try {
-                URL url = new URL("http://192.168.0.11:8080/api/auth/verify-code");
+                URL url = new URL("http://192.168.3.20:8080/api/auth/verify-code");
                 HttpURLConnection conn = (HttpURLConnection) url.openConnection();
                 conn.setRequestMethod("POST");
                 conn.setRequestProperty("Content-Type", "application/json");
