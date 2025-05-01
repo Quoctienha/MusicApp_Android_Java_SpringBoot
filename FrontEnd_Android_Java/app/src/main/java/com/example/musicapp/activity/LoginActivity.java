@@ -103,13 +103,15 @@ public class LoginActivity extends AppCompatActivity {
         // Tạo service LoginAPI từ RetrofitService
         LoginAPI loginAPI = RetrofitService.getInstance(this).createService(LoginAPI.class);
 
-        loginAPI.login(loginRequest).enqueue(new Callback<>() {
+        loginAPI.login(loginRequest).enqueue(new Callback<LoginResponseDTO>() {
             @Override
             public void onResponse(@NonNull Call<LoginResponseDTO> call, @NonNull Response<LoginResponseDTO> response) {
                 if (response.isSuccessful() && response.body() != null) {
+                    LoginResponseDTO loginResponse = response.body();
                     String accessToken = response.body().getAccessToken();
                     String refreshToken = response.body().getRefreshToken();
                     String message = response.body().getMessage(); // Lấy thông báo từ response
+                    String email = loginResponse.getEmail();
 
                     // Kiểm tra nếu thông báo thành công
                     if (message != null && !message.equals("Login successfully")) {
@@ -122,7 +124,11 @@ public class LoginActivity extends AppCompatActivity {
 
                     // Chuyển hướng đến trang chủ
                     Toast.makeText(LoginActivity.this, message, Toast.LENGTH_SHORT).show();
-                    goToHomePage();
+                    Intent intent = new Intent(LoginActivity.this, HomeActivity.class);
+                    intent.putExtra("username", username);
+                    intent.putExtra("email", email != null ? email : "unknown@example.com"); // Truyền email thực tế, nếu không có thì dùng mặc định
+                    startActivity(intent);
+                    finish();
                 } else {
                     Toast.makeText(LoginActivity.this, "Login failed. Please check your credentials or try again later.", Toast.LENGTH_SHORT).show();
                 }

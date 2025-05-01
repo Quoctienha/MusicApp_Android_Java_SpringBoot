@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@drawable/premium_background"
+    android:padding="16dp"
+    android:gravity="center">
+
+    <!-- Title: "Subscribed" -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Subscribed"
+        android:textSize="20sp"
+        android:textColor="#FFFFFF"
+        android:textStyle="bold"
+        android:layout_marginBottom="16dp" />
+
+    <!-- Introduction Text -->
+    <TextView
+        android:id="@+id/tv_subscription_intro"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Tab Subscribed là nơi bạn có thể tìm thấy tất cả các nghệ sĩ yêu thích mà bạn đã theo dõi trên ứng dụng. Danh sách này giúp bạn dễ dàng truy cập vào nội dung mới nhất từ các nghệ sĩ bạn quan tâm, mang đến trải nghiệm âm nhạc cá nhân hóa hơn."
+        android:textSize="16sp"
+        android:textColor="#BBBBBB"
+        android:gravity="center"
+        android:layout_marginTop="16dp" />
+
+</LinearLayout>
