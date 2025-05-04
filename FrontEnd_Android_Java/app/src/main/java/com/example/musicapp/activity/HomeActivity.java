@@ -1,57 +1,83 @@
 package com.example.musicapp.activity;
 
-import android.content.Intent;
 import android.os.Bundle;
-import android.widget.Button;
-import android.widget.TextView;
+import android.view.MenuItem;
 
-import androidx.appcompat.app.AppCompatActivity;
-
+import com.example.musicapp.Fragment.PremiumFragment;
+import com.example.musicapp.Fragment.SubsciptionFragment;
 import com.example.musicapp.R;
-import com.example.musicapp.auth.TokenManager;
+import com.example.musicapp.Fragment.HomeFragment;
+import com.example.musicapp.Fragment.ProfileFragment;
+
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.Fragment;
+
+import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.google.android.material.navigation.NavigationBarView;
 
 public class HomeActivity extends AppCompatActivity {
 
-    private Button btnLogout;
-    private TextView tvWelcome;
-    private TokenManager tokenManager;
+    private BottomNavigationView bottomNavigationView;
+    private String username;
+    private String email;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home);
 
-        // Khởi tạo TokenManager để truy cập token
-        tokenManager = new TokenManager(this);
+        // Lấy dữ liệu từ Intent (từ LoginActivity)
+        username = getIntent().getStringExtra("username");
+        if (username == null) username = "Username";
+        email = getIntent().getStringExtra("email");
+        if (email == null) email = "Email";
 
-        // Lấy các view từ layout
-        btnLogout = findViewById(R.id.btnLogout);
-        tvWelcome = findViewById(R.id.tvWelcome);
+        // Gán BottomNavigationView
+        bottomNavigationView = findViewById(R.id.bottom_navigation);
 
-        // Kiểm tra token và chuyển hướng nếu chưa đăng nhập
-        String accessToken = tokenManager.getAccessToken();
-        if (accessToken == null) {
-            // Nếu không có token, quay lại LoginActivity
-            Intent intent = new Intent(HomeActivity.this, LoginActivity.class);
-            startActivity(intent);
-            finish();
-        } else {
-            // Nếu có token, hiển thị trang chủ
-            String username = "User"; // Bạn có thể lấy username từ token hoặc từ SharedPreferences
-            tvWelcome.setText("Welcome, " + username);
+        // Mặc định hiển thị HomeFragment
+        if (savedInstanceState == null) {
+            getSupportFragmentManager().beginTransaction()
+                    .replace(R.id.fragment_container, new HomeFragment())
+                    .commit();
         }
 
-        // Xử lý sự kiện nhấn nút Logout
-        btnLogout.setOnClickListener(v -> logout());
-    }
+        // Xử lý chọn item trong bottom nav
+        bottomNavigationView.setOnItemSelectedListener(new NavigationBarView.OnItemSelectedListener() {
+            @Override
+            public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+                Fragment selectedFragment = null;
 
-    private void logout() {
-        // Xóa access token khi đăng xuất
-        tokenManager.clear();
+                int itemId = item.getItemId();
+                if (itemId == R.id.nav_home)
+                {
+                    selectedFragment = new HomeFragment();
+                }
 
-        // Quay lại LoginActivity
-        Intent intent = new Intent(HomeActivity.this, LoginActivity.class);
-        startActivity(intent);
-        finish(); // Đóng HomeActivity để không quay lại trang chủ sau khi đăng xuất
+                else if (itemId == R.id.nav_profile)
+                {
+                    selectedFragment = ProfileFragment.newInstance(username, email);
+                }
+
+                else if (itemId == R.id.nav_premium)
+                {
+                    selectedFragment = new PremiumFragment();
+                }
+
+                else if (itemId == R.id.nav_subscribed)
+                {
+                    selectedFragment = new SubsciptionFragment();
+                }
+
+                if (selectedFragment != null) {
+                    getSupportFragmentManager().beginTransaction()
+                            .replace(R.id.fragment_container, selectedFragment)
+                            .commit();
+                    return true;
+                }
+                return false;
+            }
+        });
     }
 }

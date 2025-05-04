@@ -8,7 +8,8 @@ import lombok.*;
 @DiscriminatorValue("CUSTOMER")
 @Getter
 @Setter
-public class Customer extends User {
+public class
+Customer extends User {
     @Enumerated(EnumType.STRING)
     private CustomerType membership;
 }
