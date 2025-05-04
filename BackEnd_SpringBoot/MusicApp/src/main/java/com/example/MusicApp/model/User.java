@@ -1,5 +1,6 @@
 package com.example.MusicApp.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -15,6 +16,7 @@ public class User {
     private String phone;
 
     // mapping với Account
+    @JsonIgnore
     @OneToOne(mappedBy = "user")
     private Account account;
 }
