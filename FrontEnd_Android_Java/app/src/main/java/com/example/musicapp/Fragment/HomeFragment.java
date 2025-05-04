@@ -281,3 +281,4 @@ public class HomeFragment extends Fragment {
         handler.removeCallbacksAndMessages(null);
     }
 }
+
