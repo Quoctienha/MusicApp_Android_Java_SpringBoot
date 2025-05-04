@@ -3,6 +3,7 @@ package com.example.musicapp.activity;
 import android.os.Bundle;
 import android.view.MenuItem;
 
+import com.example.musicapp.Fragment.PlaylistFragment;
 import com.example.musicapp.Fragment.PremiumFragment;
 import com.example.musicapp.Fragment.SubsciptionFragment;
 import com.example.musicapp.R;
@@ -68,6 +69,11 @@ public class HomeActivity extends AppCompatActivity {
                 else if (itemId == R.id.nav_subscribed)
                 {
                     selectedFragment = new SubsciptionFragment();
+                }
+
+                else if (itemId == R.id.nav_playlist)
+                {
+                    selectedFragment = new PlaylistFragment();
                 }
 
                 if (selectedFragment != null) {

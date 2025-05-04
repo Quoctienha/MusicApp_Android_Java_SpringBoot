@@ -65,6 +65,10 @@ public class PlaylistService {
     @Transactional
     public void deletePlaylist(Long id) {
         Playlist playlist = getPlaylistByOwner(id);
+
+        playlist.getSongs().clear();
+        playlistRepository.save(playlist);
+
         playlistRepository.delete(playlist);
     }
 
@@ -85,4 +89,27 @@ public class PlaylistService {
         dto.setSongIds(playlist.getSongs().stream().map(Song::getId).collect(Collectors.toList()));
         return dto;
     }
+
+    @Transactional
+    public PlaylistDTO addSongToPlaylist(Long playlistId, Long songId) {
+        Playlist playlist = getPlaylistByOwner(playlistId);
+        Song song = songRepository.findById(songId).orElseThrow(() -> new RuntimeException("Song not found"));
+
+        if (!playlist.getSongs().contains(song)) {
+            playlist.getSongs().add(song);
+        }
+
+        return convertToDTO(playlistRepository.save(playlist));
+    }
+
+    @Transactional
+    public PlaylistDTO removeSongFromPlaylist(Long playlistId, Long songId) {
+        Playlist playlist = getPlaylistByOwner(playlistId);
+        Song song = songRepository.findById(songId).orElseThrow(() -> new RuntimeException("Song not found"));
+
+        playlist.getSongs().remove(song);
+
+        return convertToDTO(playlistRepository.save(playlist));
+    }
+
 }

@@ -59,7 +59,7 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(
                         req -> req
-                                .requestMatchers("/api/auth/**", "/song", "/song/**","/playlists/**" ).permitAll()
+                                .requestMatchers("/api/auth/**" ).permitAll()
                                 .anyRequest().authenticated()
                 )
                 .sessionManagement(
