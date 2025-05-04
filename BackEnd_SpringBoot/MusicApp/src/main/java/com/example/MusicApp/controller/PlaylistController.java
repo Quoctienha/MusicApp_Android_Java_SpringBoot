@@ -30,6 +30,16 @@ public class PlaylistController {
         return ResponseEntity.ok(playlistService.createPlaylist(dto));
     }
 
+    @PutMapping("/{playlistId}/add-song/{songId}")
+    public ResponseEntity<PlaylistDTO> addSongToPlaylist(@PathVariable Long playlistId, @PathVariable Long songId) {
+        return ResponseEntity.ok(playlistService.addSongToPlaylist(playlistId, songId));
+    }
+
+    @PutMapping("/{playlistId}/remove-song/{songId}")
+    public ResponseEntity<PlaylistDTO> removeSongFromPlaylist(@PathVariable Long playlistId, @PathVariable Long songId) {
+        return ResponseEntity.ok(playlistService.removeSongFromPlaylist(playlistId, songId));
+    }
+
     @PutMapping("/{id}")
     public ResponseEntity<PlaylistDTO> updatePlaylist(@PathVariable Long id, @RequestBody PlaylistDTO dto) {
         return ResponseEntity.ok(playlistService.updatePlaylist(id, dto));
