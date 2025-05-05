@@ -7,7 +7,6 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ImageButton;
@@ -20,119 +19,133 @@ import androidx.fragment.app.Fragment;
 
 import com.example.musicapp.R;
 import com.example.musicapp.activity.LoginActivity;
+import com.example.musicapp.api.UserAPI;
 import com.example.musicapp.auth.TokenManager;
+import com.example.musicapp.dto.UserProfileResponseDTO;
 
-public class ProfileFragment extends Fragment
-{
-    private TextView tvUsername;
-    private TextView tvEmail;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+import retrofit2.Retrofit;
+import retrofit2.converter.gson.GsonConverterFactory;
 
-    public ProfileFragment()
-    {
-        // Yêu cầu bởi Fragment
-    }
+public class ProfileFragment extends Fragment {
 
-    public static ProfileFragment newInstance(String username, String email) {
-        ProfileFragment fragment = new ProfileFragment();
-        Bundle args = new Bundle();
-        args.putString("username", username);
-        args.putString("email", email);
-        fragment.setArguments(args);
-        return fragment;
-    }
+    private TextView tvUsername, tvEmail, tvFullName, tvPhone;
+    // If you add these to XML:
+    // private TextView tvFullName, tvPhone;
+
+    /* ---------------- lifecycle ---------------- */
 
     @Nullable
     @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.fragment_profile, container, false);
+    public View onCreateView(@NonNull LayoutInflater inf,
+                             @Nullable ViewGroup parent,
+                             @Nullable Bundle state) {
+        return inf.inflate(R.layout.fragment_profile, parent, false);
     }
 
     @Override
-    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
-        super.onViewCreated(view, savedInstanceState);
+    public void onViewCreated(@NonNull View v, @Nullable Bundle s) {
+        super.onViewCreated(v, s);
 
-        // Khởi tạo các TextView
-        tvUsername = view.findViewById(R.id.tvUsername);
-        tvEmail = view.findViewById(R.id.tvEmail);
+        tvUsername = v.findViewById(R.id.tvUsername);
+        tvEmail    = v.findViewById(R.id.tvEmail);
+        tvFullName = v.findViewById(R.id.tvFullName);
+        tvPhone    = v.findViewById(R.id.tvPhone);
 
-        // Lấy dữ liệu từ Bundle
-        Bundle args = getArguments();
-        if (args != null) {
-            String username = args.getString("username", "Username");
-            String email = args.getString("email", "Email");
-            Log.d("ProfileFragment", "Username: " + username + ", Email: " + email);
-            tvUsername.setText(username);
-            tvEmail.setText(email);
-        }
+        setupList(v);
+        loadProfile();                       // first fetch
+    }
 
-        // Cài đặt ListView cho các tùy chọn
-        ListView listView = view.findViewById(R.id.profile_options_list);
-        String[] options = new String[]{
-                "Favourites",
+    @Override public void onResume() {
+        super.onResume();
+        loadProfile();                       // refresh after editing
+    }
+
+    /* ---------------- list & navigation ---------------- */
+
+    private void setupList(View root) {
+        ListView list = root.findViewById(R.id.profile_options_list);
+        String[] opts = {  "Favourites",
                 "Downloads",
                 "Languages",
                 "Follow",
-                "Log Out"
-        };
+                "Edit Profile",
+                "Log Out"};
 
         ArrayAdapter<String> adapter = new ArrayAdapter<>(
                 requireContext(),
-                R.layout.list_item_profile, // Sử dụng layout tùy chỉnh
-                R.id.text1, // Không cần id này vì layout chỉ có 1 TextView, nhưng để tương thích
-                options
-        );
-        listView.setAdapter(adapter);
+                R.layout.list_item_profile,   // ← our custom row
+                R.id.text1,                   // id inside that layout
+                opts);
+        list.setAdapter(adapter);
 
-        // Xử lý sự kiện nhấn vào ListView
-        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                String selectedItem = options[position];
-                if ("Log Out".equals(selectedItem)) {
-                    // Hiển thị dialog xác nhận đăng xuất
-                    showLogoutDialog();
-                }
+        list.setOnItemClickListener((p, item, pos, id) -> {
+            String sel = opts[pos];
+            if ("Edit Profile".equals(sel)) {
+                requireActivity().getSupportFragmentManager()
+                        .beginTransaction()
+                        .replace(R.id.fragment_container, new EditProfileFragment())
+                        .addToBackStack(null)
+                        .commit();
+            } else if ("Log Out".equals(sel)) {
+                showLogoutDialog();
             }
         });
     }
 
+
+    /* ---------------- networking ---------------- */
+
+    private void loadProfile() {
+        String token = new TokenManager(requireContext()).getAccessToken();
+        if (token == null) return;
+
+        Retrofit rt = new Retrofit.Builder()
+                .baseUrl("http://10.0.2.2:8080/")
+                .addConverterFactory(GsonConverterFactory.create())
+                .build();
+
+        rt.create(UserAPI.class)
+                .getProfile("Bearer " + token)
+                .enqueue(new Callback<UserProfileResponseDTO>() {
+                    @Override
+                    public void onResponse(Call<UserProfileResponseDTO> c,
+                                           Response<UserProfileResponseDTO> r) {
+                        if (r.isSuccessful() && r.body() != null) {
+                            UserProfileResponseDTO d = r.body();
+                            tvUsername.setText(d.getUsername());
+                            tvEmail   .setText(d.getEmail());
+                            // tvFullName.setText(d.getFullName());
+                            // tvPhone   .setText(d.getPhone());
+                        } else {
+                            Log.e("Profile", "GET /profile failed " + r.code());
+                        }
+                    }
+                    @Override public void onFailure(Call<UserProfileResponseDTO> c, Throwable t) {
+                        Log.e("Profile", "network", t);
+                    }
+                });
+    }
+
+    /* ---------------- logout ---------------- */
+
     private void showLogoutDialog() {
-        // Tạo dialog
-        Dialog dialog = new Dialog(requireContext());
-        dialog.setContentView(R.layout.dialog_logout);
-        dialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
+        Dialog dlg = new Dialog(requireContext());
+        dlg.setContentView(R.layout.dialog_logout);
+        dlg.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
 
-        // Áp dụng kích thước cho dialog
-        dialog.getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        dlg.findViewById(R.id.btn_close_dialog).setOnClickListener(v -> dlg.dismiss());
 
-        // Xử lý nút đóng dialog
-        ImageButton btnCloseDialog = dialog.findViewById(R.id.btn_close_dialog);
-        btnCloseDialog.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                dialog.dismiss();
-            }
+        Button ok = dlg.findViewById(R.id.btn_confirm_logout);
+        ok.setOnClickListener(v -> {
+            new TokenManager(requireContext()).clear();
+            Intent i = new Intent(requireContext(), LoginActivity.class);
+            i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            startActivity(i);
+            requireActivity().finish();
         });
-
-        // Xử lý nút "Logout"
-        Button btnConfirmLogout = dialog.findViewById(R.id.btn_confirm_logout);
-        btnConfirmLogout.setOnClickListener(new View.OnClickListener() {
-            @Override
-
-            public void onClick(View v) {
-                TokenManager tokenManager = new TokenManager(requireContext());
-                tokenManager.getAccessToken();
-
-                // Điều hướng về LoginActivity và kết thúc HomeActivity
-                Intent intent = new Intent(requireContext(), LoginActivity.class);
-                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                startActivity(intent);
-                requireActivity().finish();
-                dialog.dismiss();
-            }
-        });
-
-        // Hiển thị dialog
-        dialog.show();
+        dlg.show();
     }
 }

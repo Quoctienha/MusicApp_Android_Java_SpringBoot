@@ -48,7 +48,7 @@ public class ResetPasswordActivity extends AppCompatActivity {
 
         new Thread(() -> {
             try {
-                URL url = new URL("http://192.168.3.20:8080/api/auth/reset-password");
+                URL url = new URL("http://172.31.96.1:8080/api/auth/reset-password");
                 HttpURLConnection conn = (HttpURLConnection) url.openConnection();
                 conn.setRequestMethod("POST");
                 conn.setRequestProperty("Content-Type", "application/json");

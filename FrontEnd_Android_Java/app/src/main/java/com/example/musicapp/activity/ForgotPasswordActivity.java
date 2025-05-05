@@ -13,6 +13,14 @@ import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
+import com.example.musicapp.api.ForgetPasswordAPI;
+import com.example.musicapp.ultis.RetrofitService;
+import com.google.gson.JsonObject;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+
 
 public class ForgotPasswordActivity extends AppCompatActivity {
 
@@ -37,45 +45,33 @@ public class ForgotPasswordActivity extends AppCompatActivity {
         String email = edtEmail.getText().toString().trim();
         if (email.isEmpty()) {
             Toast.makeText(this, "Please enter your email", Toast.LENGTH_SHORT).show();
-        } else {
-            btnSendCode.setEnabled(false);  // Disable the button
-            startCountdownTimer();          // Start countdown to re-enable it
-
-            new Thread(() -> {
-                try {
-                    URL url = new URL("http://192.168.3.20:8080/api/auth/send-code");
-                    HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-                    conn.setRequestMethod("POST");
-                    conn.setRequestProperty("Content-Type", "application/json");
-                    conn.setDoOutput(true);
-
-                    String jsonInput = "{\"email\":\"" + email + "\"}";
-
-                    try (OutputStream os = conn.getOutputStream()) {
-                        byte[] input = jsonInput.getBytes("utf-8");
-                        os.write(input, 0, input.length);
-                    }
-
-                    int responseCode = conn.getResponseCode();
-                    if (responseCode == HttpURLConnection.HTTP_OK) {
-                        runOnUiThread(() ->
-                                Toast.makeText(this, "Verification code sent to " + email, Toast.LENGTH_SHORT).show()
-                        );
-                    } else {
-                        runOnUiThread(() ->
-                                Toast.makeText(this, "Failed to send code. Response code: " + responseCode, Toast.LENGTH_LONG).show()
-                        );
-                    }
-
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    runOnUiThread(() ->
-                            Toast.makeText(this, "Error: " + e.getMessage(), Toast.LENGTH_LONG).show()
-                    );
-                }
-            }).start();
+            return;
         }
+
+        btnSendCode.setEnabled(false);
+        startCountdownTimer();
+
+        JsonObject requestBody = new JsonObject();
+        requestBody.addProperty("email", email);
+
+        ForgetPasswordAPI api = RetrofitService.getInstance(this).createService(ForgetPasswordAPI.class);
+        api.sendCode(requestBody).enqueue(new Callback<Void>() {
+            @Override
+            public void onResponse(Call<Void> call, Response<Void> response) {
+                if (response.isSuccessful()) {
+                    Toast.makeText(ForgotPasswordActivity.this, "Verification code sent to " + email, Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(ForgotPasswordActivity.this, "Failed to send code. Response code: " + response.code(), Toast.LENGTH_LONG).show();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<Void> call, Throwable t) {
+                Toast.makeText(ForgotPasswordActivity.this, "Error: " + t.getMessage(), Toast.LENGTH_LONG).show();
+            }
+        });
     }
+
 
 
 
@@ -88,45 +84,31 @@ public class ForgotPasswordActivity extends AppCompatActivity {
             return;
         }
 
-        new Thread(() -> {
-            try {
-                URL url = new URL("http://192.168.3.20:8080/api/auth/verify-code");
-                HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-                conn.setRequestMethod("POST");
-                conn.setRequestProperty("Content-Type", "application/json");
-                conn.setDoOutput(true);
+        JsonObject requestBody = new JsonObject();
+        requestBody.addProperty("email", email);
+        requestBody.addProperty("code", code);
 
-                String jsonInput = "{\"email\":\"" + email + "\",\"code\":\"" + code + "\"}";
-
-                try (OutputStream os = conn.getOutputStream()) {
-                    byte[] input = jsonInput.getBytes("utf-8");
-                    os.write(input, 0, input.length);
-                }
-
-                int responseCode = conn.getResponseCode();
-                if (responseCode == HttpURLConnection.HTTP_OK) {
-                    runOnUiThread(() -> {
-                        Toast.makeText(this, "Code verified successfully!", Toast.LENGTH_SHORT).show();
-
-                        // ✅ START the reset password activity
-                        Intent intent = new Intent(ForgotPasswordActivity.this, ResetPasswordActivity.class);
-                        intent.putExtra("email", email); // pass email forward
-                        startActivity(intent);
-                    });
+        ForgetPasswordAPI api = RetrofitService.getInstance(this).createService(ForgetPasswordAPI.class);
+        api.verifyCode(requestBody).enqueue(new Callback<Void>() {
+            @Override
+            public void onResponse(Call<Void> call, Response<Void> response) {
+                if (response.isSuccessful()) {
+                    Toast.makeText(ForgotPasswordActivity.this, "Code verified successfully!", Toast.LENGTH_SHORT).show();
+                    Intent intent = new Intent(ForgotPasswordActivity.this, ResetPasswordActivity.class);
+                    intent.putExtra("email", email);
+                    startActivity(intent);
                 } else {
-                    runOnUiThread(() ->
-                            Toast.makeText(this, "Invalid code. Please try again.", Toast.LENGTH_SHORT).show()
-                    );
+                    Toast.makeText(ForgotPasswordActivity.this, "Invalid code. Please try again.", Toast.LENGTH_SHORT).show();
                 }
-
-            } catch (Exception e) {
-                e.printStackTrace();
-                runOnUiThread(() ->
-                        Toast.makeText(this, "Error: " + e.getMessage(), Toast.LENGTH_LONG).show()
-                );
             }
-        }).start();
+
+            @Override
+            public void onFailure(Call<Void> call, Throwable t) {
+                Toast.makeText(ForgotPasswordActivity.this, "Error: " + t.getMessage(), Toast.LENGTH_LONG).show();
+            }
+        });
     }
+
 
 
     private void startCountdownTimer() {
