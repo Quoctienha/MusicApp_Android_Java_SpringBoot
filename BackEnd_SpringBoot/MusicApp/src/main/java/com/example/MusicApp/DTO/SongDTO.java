@@ -1,5 +1,7 @@
 package com.example.MusicApp.DTO;
 
+import com.example.MusicApp.model.Song;
+
 public class SongDTO {
     private Long id;
     private String title;

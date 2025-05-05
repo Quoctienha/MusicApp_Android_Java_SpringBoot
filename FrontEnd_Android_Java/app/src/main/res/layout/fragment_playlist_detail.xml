@@ -1,62 +1,38 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@drawable/gradient_background">
 
-    <!-- Nội dung chính: Artists + Music list -->
+    <ImageButton
+        android:id="@+id/backButton"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_above="@+id/recyclerViewSongsInPlaylist"
+        android:src="@drawable/ic_arrow_back"
+        android:background="@drawable/circular_ripple_background"
+        android:contentDescription="Quay lại"
+        android:padding="8dp"
+        app:tint="#FFFFFF"
+        tools:ignore="NotSibling" />
+
     <androidx.core.widget.NestedScrollView
         android:id="@+id/home_scroll"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_above="@+id/player_card"
         android:fillViewport="true"
-        android:layout_marginTop="10dp">
+        android:layout_marginTop="40dp">
 
-        <LinearLayout
-            android:orientation="vertical"
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/recyclerViewSongsInPlaylist"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:padding="16dp">
+            android:padding="8dp" />
 
-            <!-- Trending Artist -->
-            <TextView
-                android:text="Trending Artists"
-                android:textSize="18sp"
-                android:textStyle="bold"
-                android:textColor="@android:color/white"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content" />
-
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/recycler_trending_artists"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:nestedScrollingEnabled="false"
-                android:overScrollMode="never" />
-
-            <!-- Trending Music -->
-            <TextView
-                android:text="Trending Music"
-                android:textSize="18sp"
-                android:textStyle="bold"
-                android:textColor="@android:color/white"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="16dp" />
-
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/songRecyclerView"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:nestedScrollingEnabled="false"
-                android:clipToPadding="false"
-                android:paddingBottom="16dp"
-                android:overScrollMode="never" />
-        </LinearLayout>
     </androidx.core.widget.NestedScrollView>
 
     <!-- Player fixed dưới cùng -->
@@ -179,5 +155,4 @@
             </LinearLayout>
         </LinearLayout>
     </com.google.android.material.card.MaterialCardView>
-
 </RelativeLayout>
