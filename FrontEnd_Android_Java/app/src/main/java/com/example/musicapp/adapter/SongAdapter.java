@@ -17,10 +17,13 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.bumptech.glide.Glide;
 import com.example.musicapp.R;
 import com.example.musicapp.activity.LyricsActivity;
+import com.example.musicapp.api.PlaylistAPI;
 import com.example.musicapp.api.SongAPI;
 import com.example.musicapp.dto.SongDTO;
 import com.example.musicapp.ultis.RetrofitService;
+import com.example.musicapp.dto.PlaylistDTO;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import retrofit2.Call;
@@ -34,11 +37,15 @@ public class SongAdapter extends RecyclerView.Adapter<SongAdapter.SongViewHolder
     private Context context;
     private SongAPI songAPI;
 
+    private PlaylistAPI playlistAPI;
+
+
     public SongAdapter(Context context, List<SongDTO> songList, OnSongClickListener listener) {
         this.context = context;
         this.songList = songList;
         this.listener = listener;
         this.songAPI = RetrofitService.getInstance(context).createService(SongAPI.class);
+        this.playlistAPI = RetrofitService.getInstance(context).createService(PlaylistAPI.class);
     }
 
     public interface OnSongClickListener {
@@ -103,12 +110,70 @@ public class SongAdapter extends RecyclerView.Adapter<SongAdapter.SongViewHolder
                         }
                     });
                     return true;
+                }else if (itemId == R.id.menu_add_to_playlist) {
+                    showPlaylistDialog(song);
+                    return true;
                 }
                 return false;
             });
             popup.show();
         });
     }
+
+    private void showPlaylistDialog(SongDTO song) {
+        PlaylistAPI playlistAPI = RetrofitService.getInstance(context).createService(PlaylistAPI.class);
+
+        playlistAPI.getAllPlaylists().enqueue(new Callback<List<PlaylistDTO>>() {
+            @Override
+            public void onResponse(Call<List<PlaylistDTO>> call, Response<List<PlaylistDTO>> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    List<PlaylistDTO> allPlaylists = response.body();
+
+                    // Lọc ra các playlist chưa chứa bài hát
+                    List<PlaylistDTO> availablePlaylists = new ArrayList<>();
+                    for (PlaylistDTO p : allPlaylists) {
+                        if (p.getSongIds() == null || !p.getSongIds().contains(song.getId())) {
+                            availablePlaylists.add(p);
+                        }
+                    }
+
+                    if (availablePlaylists.isEmpty()) {
+                        Toast.makeText(context, "All playlists already contain this song", Toast.LENGTH_SHORT).show();
+                        return;
+                    }
+
+                    String[] playlistNames = new String[availablePlaylists.size()];
+                    for (int i = 0; i < availablePlaylists.size(); i++) {
+                        playlistNames[i] = availablePlaylists.get(i).getName();
+                    }
+
+                    new android.app.AlertDialog.Builder(context)
+                            .setTitle("Add to Playlist")
+                            .setItems(playlistNames, (dialog, which) -> {
+                                PlaylistDTO selected = availablePlaylists.get(which);
+                                playlistAPI.addSongToPlaylist(selected.getId(), song.getId()).enqueue(new Callback<PlaylistDTO>() {
+                                    @Override
+                                    public void onResponse(Call<PlaylistDTO> call, Response<PlaylistDTO> response) {
+                                        Toast.makeText(context, "Added to " + selected.getName(), Toast.LENGTH_SHORT).show();
+                                    }
+
+                                    @Override
+                                    public void onFailure(Call<PlaylistDTO> call, Throwable t) {
+                                        Toast.makeText(context, "Failed to add to playlist", Toast.LENGTH_SHORT).show();
+                                    }
+                                });
+                            })
+                            .show();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<List<PlaylistDTO>> call, Throwable t) {
+                Toast.makeText(context, "Failed to fetch playlists", Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
 
     @Override
     public int getItemCount() {

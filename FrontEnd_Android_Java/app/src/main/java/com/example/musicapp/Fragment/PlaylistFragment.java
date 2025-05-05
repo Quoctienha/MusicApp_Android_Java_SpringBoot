@@ -50,6 +50,22 @@ public class PlaylistFragment extends Fragment implements PlaylistAdapter.OnPlay
         return view;
     }
 
+    @Override
+    public void onPlaylistClick(PlaylistDTO playlist) {
+        Bundle bundle = new Bundle();
+        bundle.putLong("playlistId", playlist.getId());  // hoặc dùng putString nếu ID là chuỗi
+
+        Fragment playlistDetailFragment = new PlaylistDetailFragment();
+        playlistDetailFragment.setArguments(bundle);
+
+        requireActivity()
+                .getSupportFragmentManager()
+                .beginTransaction()
+                .replace(R.id.fragment_container, playlistDetailFragment) // fragment_container là ID layout container của Fragment
+                .addToBackStack(null)
+                .commit();
+    }
+
     private void loadPlaylists() {
         playlistApi.getAllPlaylists().enqueue(new Callback<List<PlaylistDTO>>() {
             @Override

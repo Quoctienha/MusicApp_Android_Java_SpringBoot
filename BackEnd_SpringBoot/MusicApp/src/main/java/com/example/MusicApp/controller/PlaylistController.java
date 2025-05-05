@@ -1,6 +1,7 @@
 package com.example.MusicApp.controller;
 
 import com.example.MusicApp.DTO.PlaylistDTO;
+import com.example.MusicApp.DTO.SongDTO;
 import com.example.MusicApp.service.PlaylistService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -23,6 +24,12 @@ public class PlaylistController {
     @GetMapping("/{id}")
     public ResponseEntity<PlaylistDTO> getPlaylistById(@PathVariable Long id) {
         return ResponseEntity.ok(playlistService.getPlaylistById(id));
+    }
+
+    @GetMapping("/{playlistId}/songs")
+    public ResponseEntity<List<SongDTO>> getSongsByPlaylist(@PathVariable Long playlistId) {
+        List<SongDTO> songs = playlistService.getSongsInPlaylist(playlistId);
+        return ResponseEntity.ok(songs);
     }
 
     @PostMapping

@@ -1,6 +1,7 @@
 package com.example.musicapp.api;
 
 import com.example.musicapp.dto.PlaylistDTO;
+import com.example.musicapp.dto.SongDTO;
 
 import java.util.List;
 
@@ -12,6 +13,12 @@ public interface PlaylistAPI {
     @GET("playlists")
     Call<List<PlaylistDTO>> getAllPlaylists();
 
+    @GET("playlists/{playlistId}/songs")
+    Call<List<SongDTO>> getSongsInPlaylist(@Path("playlistId") Long playlistId);
+
+    @PUT("/playlists/{playlistId}/add-song/{songId}")
+    Call<PlaylistDTO> addSongToPlaylist(@Path("playlistId") Long playlistId, @Path("songId") Long songId);
+
     @POST("playlists")
     Call<PlaylistDTO> createPlaylist(@Body PlaylistDTO playlistDTO);
 
@@ -20,4 +27,8 @@ public interface PlaylistAPI {
 
     @DELETE("playlists/{id}")
     Call<Void> deletePlaylist(@Path("id") Long id);
+
+    @GET("playlists/{id}")
+    Call<PlaylistDTO> getPlaylistById(@Path("id") long id);
+
 }

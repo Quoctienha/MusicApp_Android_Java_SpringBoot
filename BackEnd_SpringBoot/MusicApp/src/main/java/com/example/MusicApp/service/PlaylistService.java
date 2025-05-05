@@ -1,6 +1,7 @@
 package com.example.MusicApp.service;
 
 import com.example.MusicApp.DTO.PlaylistDTO;
+import com.example.MusicApp.DTO.SongDTO;
 import com.example.MusicApp.model.Customer;
 import com.example.MusicApp.model.Playlist;
 import com.example.MusicApp.model.Song;
@@ -111,5 +112,25 @@ public class PlaylistService {
 
         return convertToDTO(playlistRepository.save(playlist));
     }
+
+    public List<SongDTO> getSongsInPlaylist(Long playlistId) {
+        Playlist playlist = getPlaylistByOwner(playlistId);
+
+        return playlist.getSongs().stream()
+                .map(song -> new SongDTO(
+                        song.getId(),
+                        song.getTitle(),
+                        song.getArtist() != null ? song.getArtist().getFullName() : "Unknown",
+                        song.getFileUrl(),
+                        song.getImageUrl(),
+                        song.getLyrics(),
+                        song.getLikes(),
+                        song.getDislikes(),
+                        song.getViews()
+                ))
+                .collect(Collectors.toList());
+    }
+
+
 
 }

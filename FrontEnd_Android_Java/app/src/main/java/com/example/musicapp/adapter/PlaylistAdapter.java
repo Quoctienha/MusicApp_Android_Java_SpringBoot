@@ -19,6 +19,7 @@ public class PlaylistAdapter extends RecyclerView.Adapter<PlaylistAdapter.Playli
     public interface OnPlaylistActionListener {
         void onRename(PlaylistDTO playlist);
         void onDelete(PlaylistDTO playlist);
+        void onPlaylistClick(PlaylistDTO playlist);
     }
 
     public PlaylistAdapter(List<PlaylistDTO> playlists, OnPlaylistActionListener listener) {
@@ -39,6 +40,7 @@ public class PlaylistAdapter extends RecyclerView.Adapter<PlaylistAdapter.Playli
         holder.name.setText(playlist.getName());
         holder.rename.setOnClickListener(v -> listener.onRename(playlist));
         holder.delete.setOnClickListener(v -> listener.onDelete(playlist));
+        holder.itemView.setOnClickListener(v -> listener.onPlaylistClick(playlist));
     }
 
     @Override
@@ -55,6 +57,7 @@ public class PlaylistAdapter extends RecyclerView.Adapter<PlaylistAdapter.Playli
             name = itemView.findViewById(R.id.playlistName);
             rename = itemView.findViewById(R.id.renameIcon);
             delete = itemView.findViewById(R.id.deleteIcon);
+
         }
     }
 }
