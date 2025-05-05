@@ -47,17 +47,27 @@
                 android:text="Email"
                 android:textSize="14sp"
                 android:textColor="#BBBBBB" /> <!-- Màu xám nhạt cho email -->
+            <!-- fragment_profile.xml – inside the header LinearLayout -->
+            <TextView
+                android:id="@+id/tvFullName"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="#FFFFFF"
+                android:textSize="14sp"
+                android:visibility="gone" />
+
+            <TextView
+                android:id="@+id/tvPhone"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="#BBBBBB"
+                android:textSize="14sp"
+                android:visibility="gone" />
+
         </LinearLayout>
 
         <!-- Edit Profile Button -->
-        <Button
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Edit Profile"
-            android:textSize="14sp"
-            android:background="@android:color/transparent"
-            android:textColor="#007AFF"
-            android:padding="8dp" />
+
     </LinearLayout>
 
     <!-- Divider -->

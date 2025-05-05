@@ -3,87 +3,67 @@ package com.example.musicapp.activity;
 import android.os.Bundle;
 import android.view.MenuItem;
 
-import com.example.musicapp.Fragment.PlaylistFragment;
-import com.example.musicapp.Fragment.PremiumFragment;
-import com.example.musicapp.Fragment.SubsciptionFragment;
-import com.example.musicapp.R;
-import com.example.musicapp.Fragment.HomeFragment;
-import com.example.musicapp.Fragment.ProfileFragment;
-
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 
+import com.example.musicapp.Fragment.HomeFragment;
+import com.example.musicapp.Fragment.PlaylistFragment;
+import com.example.musicapp.Fragment.PremiumFragment;
+import com.example.musicapp.Fragment.ProfileFragment;
+import com.example.musicapp.Fragment.SubsciptionFragment;
+import com.example.musicapp.R;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.navigation.NavigationBarView;
 
 public class HomeActivity extends AppCompatActivity {
 
     private BottomNavigationView bottomNavigationView;
-    private String username;
-    private String email;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home);
 
-        // Lấy dữ liệu từ Intent (từ LoginActivity)
-        username = getIntent().getStringExtra("username");
-        if (username == null) username = "Username";
-        email = getIntent().getStringExtra("email");
-        if (email == null) email = "Email";
-
-        // Gán BottomNavigationView
         bottomNavigationView = findViewById(R.id.bottom_navigation);
 
-        // Mặc định hiển thị HomeFragment
+        // Default screen
         if (savedInstanceState == null) {
-            getSupportFragmentManager().beginTransaction()
+            getSupportFragmentManager()
+                    .beginTransaction()
                     .replace(R.id.fragment_container, new HomeFragment())
                     .commit();
         }
 
-        // Xử lý chọn item trong bottom nav
-        bottomNavigationView.setOnItemSelectedListener(new NavigationBarView.OnItemSelectedListener() {
-            @Override
-            public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-                Fragment selectedFragment = null;
+        bottomNavigationView.setOnItemSelectedListener(
+                new NavigationBarView.OnItemSelectedListener() {
+                    @Override
+                    public boolean onNavigationItemSelected(@NonNull MenuItem item) {
 
-                int itemId = item.getItemId();
-                if (itemId == R.id.nav_home)
-                {
-                    selectedFragment = new HomeFragment();
-                }
+                        Fragment selectedFragment = null;
+                        int id = item.getItemId();
 
-                else if (itemId == R.id.nav_profile)
-                {
-                    selectedFragment = ProfileFragment.newInstance(username, email);
-                }
+                        if (id == R.id.nav_home) {
+                            selectedFragment = new HomeFragment();
+                        } else if (id == R.id.nav_profile) {
+                            selectedFragment = new ProfileFragment();   // ← no args
+                        } else if (id == R.id.nav_premium) {
+                            selectedFragment = new PremiumFragment();
+                        } else if (id == R.id.nav_subscribed) {
+                            selectedFragment = new SubsciptionFragment();
+                        } else if (id == R.id.nav_playlist) {
+                            selectedFragment = new PlaylistFragment();
+                        }
 
-                else if (itemId == R.id.nav_premium)
-                {
-                    selectedFragment = new PremiumFragment();
-                }
-
-                else if (itemId == R.id.nav_subscribed)
-                {
-                    selectedFragment = new SubsciptionFragment();
-                }
-
-                else if (itemId == R.id.nav_playlist)
-                {
-                    selectedFragment = new PlaylistFragment();
-                }
-
-                if (selectedFragment != null) {
-                    getSupportFragmentManager().beginTransaction()
-                            .replace(R.id.fragment_container, selectedFragment)
-                            .commit();
-                    return true;
-                }
-                return false;
-            }
-        });
+                        if (selectedFragment != null) {
+                            getSupportFragmentManager()
+                                    .beginTransaction()
+                                    .replace(R.id.fragment_container, selectedFragment)
+                                    .commit();
+                            return true;
+                        }
+                        return false;
+                    }
+                });
     }
 }

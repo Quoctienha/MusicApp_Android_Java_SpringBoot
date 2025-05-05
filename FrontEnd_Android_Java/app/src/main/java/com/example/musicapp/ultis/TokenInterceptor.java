@@ -58,7 +58,7 @@ public class TokenInterceptor implements Interceptor {
                 // Gửi request refresh token
                 Retrofit retrofit = new Retrofit.Builder()
 
-                        .baseUrl("http://192.168.2.13:8080/")  // <-- sửa base URL
+                        .baseUrl("http://172.31.96.1:8080/")  // <-- sửa base URL
 
                         .addConverterFactory(GsonConverterFactory.create())
                         .build();
