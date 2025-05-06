@@ -13,7 +13,9 @@ import retrofit2.converter.gson.GsonConverterFactory;
 
 public class RetrofitService {
 
-    private static final String BASE_URL = "http://172.31.96.1:8080/"; // Thay URL thực tế
+
+    private static final String BASE_URL = "http://192.168.2.13:8080/"; // Thay URL thực tế
+
 
     private static RetrofitService instance;
     private final Retrofit retrofit;

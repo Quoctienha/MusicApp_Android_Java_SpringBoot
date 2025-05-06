@@ -19,6 +19,10 @@ public interface PlaylistAPI {
     @PUT("/playlists/{playlistId}/add-song/{songId}")
     Call<PlaylistDTO> addSongToPlaylist(@Path("playlistId") Long playlistId, @Path("songId") Long songId);
 
+    @PUT("playlists/{playlistId}/remove-song/{songId}")
+    Call<PlaylistDTO> removeSongFromPlaylist(@Path("playlistId") Long playlistId, @Path("songId") Long songId);
+
+
     @POST("playlists")
     Call<PlaylistDTO> createPlaylist(@Body PlaylistDTO playlistDTO);
 
