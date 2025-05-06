@@ -1,15 +1,17 @@
 package com.example.musicapp.auth;
 
 import android.content.Context;
+import android.content.Intent;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
 
+import com.example.musicapp.activity.LoginActivity;
 import com.example.musicapp.api.LoginAPI;
-import com.example.musicapp.command.LogoutCommand;
+import com.example.musicapp.command.CommandInvoker;
+import com.example.musicapp.command.NavigateToActivityCommand;
 import com.example.musicapp.dto.LoginResponseDTO;
 import com.example.musicapp.dto.RefreshTokenRequestDTO;
-
 
 import okhttp3.Authenticator;
 import okhttp3.Request;
@@ -22,15 +24,15 @@ public class TokenAuthenticator implements Authenticator {
 
     private final TokenManager tokenManager;
     private final LoginAPI loginAPI;
+
     private final Context context;
     private final Object lock = new Object();
 
     public TokenAuthenticator(TokenManager tokenManager, Retrofit retrofit, Context context) {
         this.tokenManager = tokenManager;
         this.loginAPI = retrofit.create(LoginAPI.class);
-        this.context = context;
+        this.context = context.getApplicationContext(); // Sử dụng ApplicationContext để tránh rò rỉ bộ nhớ
     }
-
 
     @Override
     public Request authenticate(Route route, @NonNull Response response){
@@ -88,7 +90,12 @@ public class TokenAuthenticator implements Authenticator {
     }
 
     private void forceLogout() {
-        new LogoutCommand(context).execute();
+        tokenManager.clear();
+        // Khởi tạo command để chuyển về LoginActivity
+        CommandInvoker invoker = new CommandInvoker();
+        NavigateToActivityCommand backToLogin = new NavigateToActivityCommand(context, LoginActivity.class, Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        invoker.setCommand(backToLogin);
+        invoker.executeCommand();
     }
 
     private int responseCount(Response response) {

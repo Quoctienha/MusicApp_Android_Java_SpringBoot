@@ -14,7 +14,7 @@ import java.util.Optional;
 @CrossOrigin(origins = "*") // For testing only
 @RestController
 @RequestMapping("/api/auth")
-public class AuthController {
+public class ForgetPasswordController {
 
     @Autowired
     private VerificationCodeService codeService;
@@ -75,7 +75,7 @@ public class AuthController {
         Optional<Account> accountOptional = accountRepository.findByEmail(email);
         if (accountOptional.isPresent()) {
             Account account = accountOptional.get();
-            account.setPassword(passwordEncoder.encode(newPassword)); // 🔐 Hash with BCrypt
+            account.setPassword(passwordEncoder.encode(newPassword)); // Hash with BCrypt
             accountRepository.save(account);
             return ResponseEntity.ok("Password reset successfully");
         } else {

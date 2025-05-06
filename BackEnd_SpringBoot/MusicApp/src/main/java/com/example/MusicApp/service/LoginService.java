@@ -72,8 +72,16 @@ public class LoginService {
     public LoginResponseDTO refreshToken(RefreshTokenRequestDTO request) {
         String refreshToken = request.getRefreshToken();
 
-        // Validate refresh token first
+        // Nếu không hợp lệ về mặt JWT (hết hạn, sai chữ ký...)
         if (!jwtService.validateRefreshToken(refreshToken)) {
+            // Cố gắng xoá refresh token khỏi DB nếu có username
+            String username = jwtService.extractUsernameIgnoreExpiration(refreshToken);
+            if (username != null) {
+                accountRepository.findByUsername(username).ifPresent(account -> {
+                    account.setRefreshToken(null);
+                    accountRepository.save(account);
+                });
+            }
             return new LoginResponseDTO(null, null, "Refresh token expired or invalid.");
         }
 
@@ -89,13 +97,16 @@ public class LoginService {
 
         Account account = optionalAccount.get();
 
-        // Kiểm tra refresh token có khớp với token trong cơ sở dữ liệu không
+
+        // Token hợp lệ về mặt JWT nhưng không khớp với DB
         if (!refreshToken.equals(account.getRefreshToken())) {
+            account.setRefreshToken(null); // Xoá refresh token trong DB
+            accountRepository.save(account);
             return new LoginResponseDTO(null, null, "Invalid refresh token. Please login again.");
         }
 
 
-        // Generate new tokens
+        // tạo tokens mới
         String newAccessToken = jwtService.generateAccessToken(username);
         String newRefreshToken = jwtService.generateRefreshToken(username);
 

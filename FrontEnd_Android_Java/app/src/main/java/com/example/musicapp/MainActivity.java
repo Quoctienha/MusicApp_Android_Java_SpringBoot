@@ -20,7 +20,7 @@ public class MainActivity extends AppCompatActivity {
         //setContentView(R.layout.activity_main);
 
         decideNavigation();
-        //finish(); // Đóng MainActivity để không quay lại trang này
+        finish(); // Đóng MainActivity để không quay lại trang này
     }
 
     private void decideNavigation() {

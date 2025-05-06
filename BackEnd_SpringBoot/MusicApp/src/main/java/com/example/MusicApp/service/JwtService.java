@@ -45,6 +45,22 @@ public class JwtService {
         return extractAllClaims(token).getSubject();
     }
 
+    public String extractUsernameIgnoreExpiration(String token) {
+        try {
+            Claims claims = Jwts.parserBuilder()
+                    .setSigningKey(SECRET_KEY)
+                    .build()
+                    .parseClaimsJws(token)
+                    .getBody();
+            return claims.getSubject();
+        } catch (ExpiredJwtException ex) {
+            return ex.getClaims().getSubject(); // Token hết hạn vẫn lấy được username
+        } catch (JwtException e) {
+            return null; // Token không hợp lệ
+        }
+    }
+
+
     private Claims extractAllClaims(String token) {
         return Jwts.parserBuilder()
                 .setSigningKey(SECRET_KEY)

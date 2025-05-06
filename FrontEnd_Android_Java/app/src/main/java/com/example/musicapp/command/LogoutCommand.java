@@ -24,7 +24,10 @@ public class LogoutCommand implements Command {
     public LogoutCommand(Context context) {
         this.context = context;
         this.tokenManager = new TokenManager(context);
-        this.navigateToLogin =   new NavigateToActivityCommand(context, LoginActivity.class, Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        this.navigateToLogin =   new NavigateToActivityCommand(context, LoginActivity.class
+                , Intent.FLAG_ACTIVITY_NEW_TASK
+                | Intent.FLAG_ACTIVITY_CLEAR_TASK
+        );
     }
 
     @Override
