@@ -8,6 +8,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -44,6 +45,7 @@ public class HomeFragment extends Fragment {
     private TextView songTitleTextView;
     private TextView songArtistTextView;
     private TextView startTimeTextView, endTimeTextView;
+
     private Handler handler = new Handler();
 
     private static final String TAG = "PLAYER";

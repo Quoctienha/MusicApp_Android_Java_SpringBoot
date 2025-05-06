@@ -10,20 +10,6 @@
         android:orderInCategory="100" />
 
     <item
-        android:id="@+id/menu_like"
-        android:title="Like"
-        android:icon="@drawable/ic_thumb_up"
-        app:showAsAction="ifRoom"
-        android:orderInCategory="200" />
-
-    <item
-        android:id="@+id/menu_dislike"
-        android:title="Dislike"
-        android:icon="@drawable/ic_thumb_down"
-        app:showAsAction="ifRoom"
-        android:orderInCategory="300" />
-
-    <item
         android:id="@+id/menu_add_to_playlist"
         android:title="Add Playlist"
         android:icon="@drawable/ic_add_playlist"

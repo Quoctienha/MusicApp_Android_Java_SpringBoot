@@ -20,6 +20,7 @@ import com.example.musicapp.activity.LyricsActivity;
 import com.example.musicapp.api.PlaylistAPI;
 import com.example.musicapp.api.SongAPI;
 import com.example.musicapp.dto.SongDTO;
+import com.example.musicapp.dto.SongRatingResponseDTO;
 import com.example.musicapp.ultis.RetrofitService;
 import com.example.musicapp.dto.PlaylistDTO;
 
@@ -70,6 +71,34 @@ public class SongAdapter extends RecyclerView.Adapter<SongAdapter.SongViewHolder
                 .placeholder(R.drawable.placeholder)
                 .into(holder.coverImage);
 
+        songAPI.getUserRatingForSong(song.getId()).enqueue(new Callback<SongRatingResponseDTO>() {
+            @Override
+            public void onResponse(Call<SongRatingResponseDTO> call, Response<SongRatingResponseDTO> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    String userRating = response.body().getRating();
+                    if ("like".equals(userRating)) {
+                        holder.likeButton.setImageResource(R.drawable.ic_like_filled); // Icon đầy
+                        holder.dislikeButton.setImageResource(R.drawable.ic_dislike_empty); // Icon trống
+                    } else if ("dislike".equals(userRating)) {
+                        holder.likeButton.setImageResource(R.drawable.ic_like_empty); // Icon trống
+                        holder.dislikeButton.setImageResource(R.drawable.ic_dislike_filled); // Icon đầy
+                    } else {
+                        holder.likeButton.setImageResource(R.drawable.ic_like_empty); // Icon trống
+                        holder.dislikeButton.setImageResource(R.drawable.ic_dislike_empty); // Icon trống
+                    }
+                } else {
+                    Log.e("SongAdapter", "getUserRating failed: " + response.code() + ", " + response.message());
+                }
+            }
+
+            @Override
+            public void onFailure(Call<SongRatingResponseDTO> call, Throwable t) {
+                Log.e("SongAdapter", "getUserRating error", t);
+            }
+        });
+
+
+
         holder.itemView.setOnClickListener(v -> listener.onSongClick(song));
 
         holder.menuButton.setOnClickListener(v -> {
@@ -84,39 +113,47 @@ public class SongAdapter extends RecyclerView.Adapter<SongAdapter.SongViewHolder
                     intent.putExtra("lyrics", song.getLyrics());
                     context.startActivity(intent);
                     return true;
-                } else if (itemId == R.id.menu_like) {
-                    songAPI.likeSong(song.getId()).enqueue(new Callback<Void>() {
-                        @Override
-                        public void onResponse(Call<Void> call, Response<Void> response) {
-                            Toast.makeText(context, "Liked " + song.getTitle(), Toast.LENGTH_SHORT).show();
-                        }
-
-                        @Override
-                        public void onFailure(Call<Void> call, Throwable t) {
-                            Toast.makeText(context, "Failed to like", Toast.LENGTH_SHORT).show();
-                        }
-                    });
-                    return true;
-                } else if (itemId == R.id.menu_dislike) {
-                    songAPI.dislikeSong(song.getId()).enqueue(new Callback<Void>() {
-                        @Override
-                        public void onResponse(Call<Void> call, Response<Void> response) {
-                            Toast.makeText(context, "Disliked " + song.getTitle(), Toast.LENGTH_SHORT).show();
-                        }
-
-                        @Override
-                        public void onFailure(Call<Void> call, Throwable t) {
-                            Toast.makeText(context, "Failed to dislike", Toast.LENGTH_SHORT).show();
-                        }
-                    });
-                    return true;
-                }else if (itemId == R.id.menu_add_to_playlist) {
+                } else if (itemId == R.id.menu_add_to_playlist) {
                     showPlaylistDialog(song);
                     return true;
                 }
                 return false;
             });
             popup.show();
+        });
+
+        // Handle like button click
+        holder.likeButton.setOnClickListener(v -> {
+            songAPI.likeSong(song.getId()).enqueue(new Callback<Void>() {
+                @Override
+                public void onResponse(Call<Void> call, Response<Void> response) {
+                    holder.likeButton.setImageResource(R.drawable.ic_like_filled); // Icon đầy
+                    holder.dislikeButton.setImageResource(R.drawable.ic_dislike_empty); // Icon trống
+                    Toast.makeText(context, "Liked " + song.getTitle(), Toast.LENGTH_SHORT).show();
+                }
+
+                @Override
+                public void onFailure(Call<Void> call, Throwable t) {
+                    Toast.makeText(context, "Failed to like", Toast.LENGTH_SHORT).show();
+                }
+            });
+        });
+
+        // Handle dislike button click
+        holder.dislikeButton.setOnClickListener(v -> {
+            songAPI.dislikeSong(song.getId()).enqueue(new Callback<Void>() {
+                @Override
+                public void onResponse(Call<Void> call, Response<Void> response) {
+                    holder.likeButton.setImageResource(R.drawable.ic_like_empty); // Icon trống
+                    holder.dislikeButton.setImageResource(R.drawable.ic_dislike_filled); // Icon đầy
+                    Toast.makeText(context, "Disliked " + song.getTitle(), Toast.LENGTH_SHORT).show();
+                }
+
+                @Override
+                public void onFailure(Call<Void> call, Throwable t) {
+                    Toast.makeText(context, "Failed to dislike", Toast.LENGTH_SHORT).show();
+                }
+            });
         });
     }
 
@@ -183,6 +220,7 @@ public class SongAdapter extends RecyclerView.Adapter<SongAdapter.SongViewHolder
     public static class SongViewHolder extends RecyclerView.ViewHolder {
         TextView titleText, artistText;
         ImageView coverImage, menuButton;
+        ImageView likeButton, dislikeButton;
 
         public SongViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -190,6 +228,8 @@ public class SongAdapter extends RecyclerView.Adapter<SongAdapter.SongViewHolder
             artistText = itemView.findViewById(R.id.songArtist);
             coverImage = itemView.findViewById(R.id.songCoverImage);
             menuButton = itemView.findViewById(R.id.menu_button);
+            likeButton = itemView.findViewById(R.id.like_button);
+            dislikeButton = itemView.findViewById(R.id.dislike_button);
         }
     }
 }

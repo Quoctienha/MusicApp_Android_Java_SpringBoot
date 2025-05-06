@@ -29,25 +29,36 @@ public class LogoutCommand implements Command {
 
     @Override
     public void execute() {
+        String accessToken = tokenManager.getAccessToken();
+
+        if (accessToken == null || accessToken.isEmpty()) {
+            Log.e("Logout", "No access token found, clearing local token anyway.");
+            finishLogout();
+            return;
+        }
 
         LogoutAPI logoutAPI = RetrofitService.getInstance(context).createService(LogoutAPI.class);
         logoutAPI.logout().enqueue(new Callback<>() {
             @Override
             public void onResponse(@NonNull Call<Void> call, @NonNull Response<Void> response) {
                 if (response.isSuccessful()) {
-                    tokenManager.clear(); // Xoá token local
-                    // Chuyển hướng người dùng về màn hình login
-                    navigateToLogin.execute();
+                    Log.d("Logout", "Logout successful on server.");
                 } else {
                     Log.e("Logout", "Server error return: " + response.code());
                 }
+                finishLogout();
             }
 
             @Override
             public void onFailure(@NonNull Call<Void> call,@NonNull Throwable t) {
                 Log.e("Logout", "Can't call API logout", t);
+                finishLogout();
             }
         });
 
+    }
+    private void finishLogout() {
+        tokenManager.clear(); // Xoá token local
+        navigateToLogin.execute(); // Chuyển hướng người dùng về màn hình login
     }
 }

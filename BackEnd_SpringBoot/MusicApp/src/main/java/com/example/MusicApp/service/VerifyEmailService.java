@@ -4,6 +4,7 @@ import com.example.MusicApp.model.Account;
 import com.example.MusicApp.model.VerificationToken;
 import com.example.MusicApp.repository.AccountRepository;
 import com.example.MusicApp.repository.VerificationTokenRepository;
+import lombok.Data;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -12,6 +13,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 @Service
+@Data
 public class VerifyEmailService {
 
     @Autowired

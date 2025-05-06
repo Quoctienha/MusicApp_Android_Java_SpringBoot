@@ -13,10 +13,10 @@ public class JwtService {
 
     private static final Key SECRET_KEY = Keys.secretKeyFor(SignatureAlgorithm.HS256);
     // Access Token: 5 phút
-    private static final long ACCESS_TOKEN_EXPIRATION = 1000 * 60 ;
+    private static final long ACCESS_TOKEN_EXPIRATION = 1000 * 60 * 5;
 
-    // Refresh Token: 7 ngày 1000L * 60 * 60 * 24 * 7
-    private static final long REFRESH_TOKEN_EXPIRATION = 1000 * 60 * 5;
+    // Refresh Token: 7 ngày
+    private static final long REFRESH_TOKEN_EXPIRATION = 1000L * 60 * 60 * 24 * 7;
 
     public String generateAccessToken(String username) {
         return buildToken(username, ACCESS_TOKEN_EXPIRATION, null);

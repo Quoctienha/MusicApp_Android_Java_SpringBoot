@@ -2,6 +2,7 @@
 package com.example.musicapp.api;
 
 import com.example.musicapp.dto.SongDTO;
+import com.example.musicapp.dto.SongRatingResponseDTO;
 
 import java.util.List;
 
@@ -25,4 +26,7 @@ public interface SongAPI {
 
     @PUT("/song/{id}/view")
     Call<Void> incrementView(@Path("id") Long songId);
+
+    @GET("/song/{id}/rating")
+    Call<SongRatingResponseDTO> getUserRatingForSong(@Path("id") Long songId);
 }

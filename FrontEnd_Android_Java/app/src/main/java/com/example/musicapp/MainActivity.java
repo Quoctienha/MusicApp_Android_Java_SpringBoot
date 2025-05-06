@@ -18,8 +18,9 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         //EdgeToEdge.enable(this);
         //setContentView(R.layout.activity_main);
+
         decideNavigation();
-        finish(); // Đóng MainActivity để không quay lại trang này
+        //finish(); // Đóng MainActivity để không quay lại trang này
     }
 
     private void decideNavigation() {

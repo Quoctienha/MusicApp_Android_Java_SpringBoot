@@ -1,9 +1,15 @@
 package com.example.MusicApp.model;
 
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Entity
 @Table(name = "song")
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class Song {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -28,33 +34,5 @@ public class Song {
     private int dislikes;
     private int views;
 
-
-    // Getters and Setters
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
-
-    public String getTitle() { return title; }
-    public void setTitle(String title) { this.title = title; }
-
-    public Artist getArtist() { return artist; }
-    public void setArtist(Artist artist) { this.artist = artist; }
-
-    public String getFileUrl() { return fileUrl; }
-    public void setFileUrl(String fileUrl) { this.fileUrl = fileUrl; }
-
-    public String getImageUrl() { return imageUrl; }
-    public void setImageUrl(String imageUrl) { this.imageUrl = imageUrl; }
-
-    public String getLyrics() { return lyrics; }
-    public void setLyrics(String lyrics) { this.lyrics = lyrics; }
-
-    public int getLikes() { return likes; }
-    public void setLikes(int likes) { this.likes = likes; }
-
-    public int getDislikes() { return dislikes; }
-    public void setDislikes(int dislikes) { this.dislikes = dislikes; }
-
-    public int getViews() { return views; }
-    public void setViews(int views) { this.views = views; }
 
 }

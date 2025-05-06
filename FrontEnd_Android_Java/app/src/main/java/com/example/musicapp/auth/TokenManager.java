@@ -2,6 +2,7 @@ package com.example.musicapp.auth;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.util.Log;
 
 import com.auth0.android.jwt.JWT;
 
@@ -34,7 +35,6 @@ public class TokenManager {
     public String getRefreshToken() {
         return prefs.getString(KEY_REFRESH, null);
     }
-
     public void clear() {
         prefs.edit().clear().apply();
     }
@@ -45,6 +45,7 @@ public class TokenManager {
             Date expiresAt = jwt.getExpiresAt();
             return expiresAt != null && expiresAt.before(new Date());
         } catch (Exception e) {
+            Log.e("JWT", "Invalid token format", e);
             return true; // Nếu token lỗi định dạng, coi như hết hạn
         }
     }

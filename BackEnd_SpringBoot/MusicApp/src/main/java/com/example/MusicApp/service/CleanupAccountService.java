@@ -3,6 +3,7 @@ package com.example.MusicApp.service;
 import com.example.MusicApp.model.VerificationToken;
 import com.example.MusicApp.repository.AccountRepository;
 import com.example.MusicApp.repository.VerificationTokenRepository;
+import lombok.Data;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -11,6 +12,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
+@Data
 public class CleanupAccountService {
     @Autowired
     private VerificationTokenRepository tokenRepo;

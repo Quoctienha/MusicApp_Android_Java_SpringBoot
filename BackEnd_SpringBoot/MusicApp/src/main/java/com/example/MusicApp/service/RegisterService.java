@@ -6,7 +6,7 @@ import com.example.MusicApp.model.Account;
 import com.example.MusicApp.model.Customer;
 import com.example.MusicApp.model.CustomerType;
 import com.example.MusicApp.repository.AccountRepository;
-import lombok.RequiredArgsConstructor;
+import lombok.Data;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -14,7 +14,7 @@ import org.springframework.stereotype.Service;
 
 
 @Service
-@RequiredArgsConstructor
+@Data
 public class RegisterService {
 
     private final AccountRepository accountRepo;
@@ -41,7 +41,7 @@ public class RegisterService {
         }
 
         // Kiểm tra password
-        if (!req.getPassword().matches("^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@#$%^&+=!])[^\s]{8,64}$")) {
+        if (!req.getPassword().matches("^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@#$%^&+=!])\\S{8,64}$")) {
             registerResponseDTO.setMessage("Password must be 8-64 characters, contain uppercase letters, lowercase letters, numbers, special characters and no spaces.");
             return registerResponseDTO;
         }
