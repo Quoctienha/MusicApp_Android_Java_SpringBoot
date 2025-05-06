@@ -27,6 +27,7 @@ public class SecurityConfig {
     
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
     private final UserDetailsService userDetailsService;
+    private final CustomAuthenticationEntryPoint customAuthenticationEntryPoint;
 
     //Mã hóa mật khẩu
     @Bean
@@ -65,7 +66,10 @@ public class SecurityConfig {
                 .sessionManagement(
                         session -> session
                                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-                ).addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
+                ).exceptionHandling(exception -> exception
+                        .authenticationEntryPoint(customAuthenticationEntryPoint)  // Thêm dòng này
+                )
+                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
                 .authenticationProvider(authenticationProvider());
         return http.build();
     }

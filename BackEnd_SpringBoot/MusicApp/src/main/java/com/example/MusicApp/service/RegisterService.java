@@ -28,6 +28,24 @@ public class RegisterService {
     public RegisterResponseDTO registerCustomer(RegisterRequestDTO req){
 
         registerResponseDTO.setStatus("Failed");
+        // Kiểm tra username
+        if (!req.getUsername().matches("^[a-zA-Z0-9._]{3,30}$")) {
+            registerResponseDTO.setMessage("Username must be 3-30 characters long, no spaces or special characters.");
+            return registerResponseDTO;
+        }
+
+        // Kiểm tra email hợp lệ
+        if (!req.getEmail().matches("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$\n")) {
+            registerResponseDTO.setMessage("Email must be structured correctly as example: example@domain.com");
+            return registerResponseDTO;
+        }
+
+        // Kiểm tra password
+        if (!req.getPassword().matches("^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@#$%^&+=!])[^\s]{8,64}$")) {
+            registerResponseDTO.setMessage("Password must be 8-64 characters, contain uppercase letters, lowercase letters, numbers, special characters and no spaces.");
+            return registerResponseDTO;
+        }
+
         //Kiểm tra password và confirmPassword có khớp không
         if (!req.getPassword().equals(req.getConfirmPassword())){
             registerResponseDTO.setMessage("Password doesn't match.");

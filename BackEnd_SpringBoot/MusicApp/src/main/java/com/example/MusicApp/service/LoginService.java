@@ -10,6 +10,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,7 +26,7 @@ public class LoginService {
 
 
     @Transactional
-    public LoginResponseDTO login(LoginRequestDTO request) {
+    public LoginResponseDTO applogin(LoginRequestDTO request) {
 
         Authentication authentication;
         try {
@@ -39,6 +40,15 @@ public class LoginService {
         } catch (BadCredentialsException ex) {
             // Nếu sai username hoặc password
             return new LoginResponseDTO(null, null, "Invalid username or password.");
+        }
+
+        //Kiểm tra role: chỉ cho phép ROLE_CUSTOMER
+        boolean isCustomer = authentication.getAuthorities().stream()
+                .map(GrantedAuthority::getAuthority)
+                .anyMatch(role -> role.equals("ROLE_CUSTOMER"));
+
+        if (!isCustomer) {
+            return new LoginResponseDTO(null, null, "Only customers are allowed to login.");
         }
 
         // Set authentication in security context
@@ -84,6 +94,7 @@ public class LoginService {
             return new LoginResponseDTO(null, null, "Invalid refresh token. Please login again.");
         }
 
+
         // Generate new tokens
         String newAccessToken = jwtService.generateAccessToken(username);
         String newRefreshToken = jwtService.generateRefreshToken(username);
@@ -91,6 +102,8 @@ public class LoginService {
         // Cập nhật refresh token vào cơ sở dữ liệu
         account.setRefreshToken(newRefreshToken);
         accountRepository.save(account);
+
+        System.out.println("Refresh tokens successfully");
 
         return new LoginResponseDTO(newAccessToken, newRefreshToken, "Token refreshed successfully.");
     }

@@ -1,11 +1,16 @@
 package com.example.musicapp.auth;
 
+import android.content.Context;
+import android.util.Log;
+
 import androidx.annotation.NonNull;
 
 import com.example.musicapp.api.LoginAPI;
-import com.example.musicapp.dto.RefreshTokenRequestDTO;
+import com.example.musicapp.command.LogoutCommand;
 import com.example.musicapp.dto.LoginResponseDTO;
-import java.io.IOException;
+import com.example.musicapp.dto.RefreshTokenRequestDTO;
+
+
 import okhttp3.Authenticator;
 import okhttp3.Request;
 import okhttp3.Response;
@@ -14,47 +19,76 @@ import retrofit2.Call;
 import retrofit2.Retrofit;
 
 public class TokenAuthenticator implements Authenticator {
-    private final TokenManager tokenManager;
-    private final LoginAPI authApi;
 
-    public TokenAuthenticator(TokenManager tokenManager, Retrofit retrofit) {
+    private final TokenManager tokenManager;
+    private final LoginAPI loginAPI;
+    private final Context context;
+    private final Object lock = new Object();
+
+    public TokenAuthenticator(TokenManager tokenManager, Retrofit retrofit, Context context) {
         this.tokenManager = tokenManager;
-        this.authApi = retrofit.create(LoginAPI.class);
+        this.loginAPI = retrofit.create(LoginAPI.class);
+        this.context = context;
     }
 
+
     @Override
-    public Request authenticate(Route route,@NonNull Response response) throws IOException {
-        // Nếu đã thử refresh trước đó, dừng
+    public Request authenticate(Route route, @NonNull Response response){
+
         if (responseCount(response) >= 2) {
-            tokenManager.clear();
+            forceLogout();
             return null;
         }
 
-        String refreshToken = tokenManager.getRefreshToken();
-        if (refreshToken == null) {
-            tokenManager.clear();
-            return null;
+        synchronized (lock) {
+            String currentAccess = tokenManager.getAccessToken();
+            String requestAccess = response.request().header("Authorization");
+
+            if (requestAccess != null && requestAccess.equals("Bearer " + currentAccess)) {
+                String refreshToken = tokenManager.getRefreshToken();
+                if (refreshToken == null) {
+                    forceLogout();
+                    return null;
+                }
+
+                try {
+                    // Gửi yêu cầu làm mới token
+                    Call<LoginResponseDTO> call = loginAPI.refreshToken(new RefreshTokenRequestDTO(refreshToken));
+                    retrofit2.Response<LoginResponseDTO> tokenResponse = call.execute();
+
+                    if (tokenResponse.isSuccessful()
+                            && tokenResponse.body() != null
+                            && tokenResponse.body().getAccessToken() != null
+                            && tokenResponse.body().getRefreshToken() != null) {
+
+                        String newAccess = tokenResponse.body().getAccessToken();
+                        String newRefresh = tokenResponse.body().getRefreshToken();
+                        tokenManager.saveTokens(newAccess, newRefresh);
+
+                        return response.request().newBuilder()
+                                .header("Authorization", "Bearer " + newAccess)
+                                .build();
+                    } else {
+                        forceLogout();
+                        return null;
+                    }
+                } catch (Exception e) {
+                    // Log lỗi khi gọi API refresh token
+                    Log.e("TokenAuthenticator", "Error during token refresh", e);
+                    forceLogout();
+                    return null;
+                }
+            } else {
+                // Token đã được cập nhật bởi thread khác → retry với token mới
+                return response.request().newBuilder()
+                        .header("Authorization", "Bearer " + tokenManager.getAccessToken())
+                        .build();
+            }
         }
+    }
 
-        // Đồng bộ gọi API refresh-token
-        RefreshTokenRequestDTO refreshReq = new RefreshTokenRequestDTO(refreshToken);
-        Call<LoginResponseDTO> call = authApi.refreshToken(refreshReq);
-        retrofit2.Response<LoginResponseDTO> resp = call.execute();
-
-        if (resp.isSuccessful() && resp.body() != null) {
-            String newAccess = resp.body().getAccessToken();
-            String newRefresh = resp.body().getRefreshToken();
-            tokenManager.saveTokens(newAccess, newRefresh);
-
-            // Retry request với Access Token mới
-            return response.request().newBuilder()
-                    .header("Authorization", "Bearer " + newAccess)
-                    .build();
-        }
-
-        // Không thể refresh
-        tokenManager.clear();
-        return null;
+    private void forceLogout() {
+        new LogoutCommand(context).execute();
     }
 
     private int responseCount(Response response) {
@@ -65,4 +99,3 @@ public class TokenAuthenticator implements Authenticator {
         return count;
     }
 }
-

@@ -3,6 +3,10 @@ package com.example.musicapp.auth;
 import android.content.Context;
 import android.content.SharedPreferences;
 
+import com.auth0.android.jwt.JWT;
+
+import java.util.Date;
+
 //Dùng SharedPreferences để giữ accessToken và refreshToken:
 public class TokenManager {
     private static final String PREF_NAME = "auth_prefs";
@@ -33,6 +37,16 @@ public class TokenManager {
 
     public void clear() {
         prefs.edit().clear().apply();
+    }
+
+    public boolean isTokenExpired(String token) {
+        try {
+            JWT jwt = new JWT(token);
+            Date expiresAt = jwt.getExpiresAt();
+            return expiresAt != null && expiresAt.before(new Date());
+        } catch (Exception e) {
+            return true; // Nếu token lỗi định dạng, coi như hết hạn
+        }
     }
 }
 

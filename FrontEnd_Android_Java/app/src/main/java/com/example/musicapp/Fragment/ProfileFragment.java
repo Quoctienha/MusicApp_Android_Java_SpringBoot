@@ -1,7 +1,6 @@
 package com.example.musicapp.Fragment;
 
 import android.app.Dialog;
-import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -9,7 +8,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.TextView;
 
@@ -18,9 +16,11 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
 import com.example.musicapp.R;
-import com.example.musicapp.activity.LoginActivity;
 import com.example.musicapp.api.UserAPI;
 import com.example.musicapp.auth.TokenManager;
+import com.example.musicapp.command.Command;
+import com.example.musicapp.command.CommandInvoker;
+import com.example.musicapp.command.LogoutCommand;
 import com.example.musicapp.dto.UserProfileResponseDTO;
 
 import retrofit2.Call;
@@ -140,11 +140,16 @@ public class ProfileFragment extends Fragment {
 
         Button ok = dlg.findViewById(R.id.btn_confirm_logout);
         ok.setOnClickListener(v -> {
-            new TokenManager(requireContext()).clear();
-            Intent i = new Intent(requireContext(), LoginActivity.class);
-            i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-            startActivity(i);
-            requireActivity().finish();
+            // Khởi tạo và thực thi LogoutCommand
+            Command logoutCommand = new LogoutCommand(requireContext());
+
+            // Sử dụng CommandInvoker để thực thi LogoutCommand
+            CommandInvoker invoker = new CommandInvoker();
+            invoker.setCommand(logoutCommand);
+            invoker.executeCommand();
+
+            // Đóng dialog
+            dlg.dismiss();
         });
         dlg.show();
     }
