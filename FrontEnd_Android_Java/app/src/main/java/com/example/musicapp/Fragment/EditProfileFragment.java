@@ -65,6 +65,10 @@ public class EditProfileFragment extends Fragment {
             Toast.makeText(getContext(),"Phone must be exactly 10 digits",Toast.LENGTH_SHORT).show();
             return;
         }
+        if (!isValidFullName(name)) {
+            Toast.makeText(getContext(), "Name must contain letters only", Toast.LENGTH_SHORT).show();
+            return;
+        }
 
         // 1️⃣  Shared Retrofit service (token auto-added by interceptor)
         UserAPI api = RetrofitService
@@ -95,4 +99,9 @@ public class EditProfileFragment extends Fragment {
         // exactly 10 digits
         return phone != null && phone.matches("^\\d{10}$");
     }
+    /** Returns true if the name contains ONLY letters and spaces (no digits, no punctuation). */
+    private boolean isValidFullName(String name) {
+        return name != null && name.matches("^[A-Za-zÀ-ÖØ-öø-ÿ\\s]+$");
+    }
+
 }
