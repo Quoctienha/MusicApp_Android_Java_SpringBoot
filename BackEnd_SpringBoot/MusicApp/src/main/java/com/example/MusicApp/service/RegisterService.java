@@ -35,7 +35,7 @@ public class RegisterService {
         }
 
         // Kiểm tra email hợp lệ
-        if (!req.getEmail().matches("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$\n")) {
+        if (!req.getEmail().matches("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$")) {
             registerResponseDTO.setMessage("Email must be structured correctly as example: example@domain.com");
             return registerResponseDTO;
         }

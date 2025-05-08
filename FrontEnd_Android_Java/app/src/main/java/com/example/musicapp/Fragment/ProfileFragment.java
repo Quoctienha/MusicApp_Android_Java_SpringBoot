@@ -28,6 +28,7 @@ import retrofit2.Callback;
 import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
+import com.example.musicapp.ultis.RetrofitService;
 
 public class ProfileFragment extends Fragment {
 
@@ -67,10 +68,7 @@ public class ProfileFragment extends Fragment {
 
     private void setupList(View root) {
         ListView list = root.findViewById(R.id.profile_options_list);
-        String[] opts = {  "Favourites",
-                "Downloads",
-                "Languages",
-                "Follow",
+        String[] opts = {
                 "Edit Profile",
                 "Log Out"};
 
@@ -99,36 +97,46 @@ public class ProfileFragment extends Fragment {
     /* ---------------- networking ---------------- */
 
     private void loadProfile() {
-        String token = new TokenManager(requireContext()).getAccessToken();
-        if (token == null) return;
 
-        Retrofit rt = new Retrofit.Builder()
-                .baseUrl("http://10.0.2.2:8080/")
-                .addConverterFactory(GsonConverterFactory.create())
-                .build();
+        // 1️⃣  Create the shared Retrofit service (no token needed)
+        UserAPI api = RetrofitService
+                .getInstance(requireContext())
+                .createService(UserAPI.class);
 
-        rt.create(UserAPI.class)
-                .getProfile("Bearer " + token)
-                .enqueue(new Callback<UserProfileResponseDTO>() {
-                    @Override
-                    public void onResponse(Call<UserProfileResponseDTO> c,
-                                           Response<UserProfileResponseDTO> r) {
-                        if (r.isSuccessful() && r.body() != null) {
-                            UserProfileResponseDTO d = r.body();
-                            tvUsername.setText(d.getUsername());
-                            tvEmail   .setText(d.getEmail());
-                            // tvFullName.setText(d.getFullName());
-                            // tvPhone   .setText(d.getPhone());
-                        } else {
-                            Log.e("Profile", "GET /profile failed " + r.code());
-                        }
+        // 2️⃣  Call GET /api/user/profile with NO header arg
+        api.getProfile().enqueue(new Callback<UserProfileResponseDTO>() {
+            @Override public void onResponse(Call<UserProfileResponseDTO> c,
+                                             Response<UserProfileResponseDTO> r) {
+                if (r.isSuccessful() && r.body()!=null) {
+                    UserProfileResponseDTO d = r.body();
+
+                    boolean hasFull  = d.getFullName()!=null && !d.getFullName().isEmpty();
+                    boolean hasPhone = d.getPhone()!=null    && !d.getPhone()   .isEmpty();
+
+                    if (hasFull && hasPhone) {
+                        tvFullName.setText(d.getFullName());
+                        tvPhone   .setText(d.getPhone());
+                        tvFullName.setVisibility(View.VISIBLE);
+                        tvPhone   .setVisibility(View.VISIBLE);
+                        tvUsername.setVisibility(View.GONE);
+                        tvEmail   .setVisibility(View.GONE);
+                    } else {
+                        tvUsername.setText(d.getUsername());
+                        tvEmail   .setText(d.getEmail());
+                        tvUsername.setVisibility(View.VISIBLE);
+                        tvEmail   .setVisibility(View.VISIBLE);
+                        tvFullName.setVisibility(View.GONE);
+                        tvPhone   .setVisibility(View.GONE);
                     }
-                    @Override public void onFailure(Call<UserProfileResponseDTO> c, Throwable t) {
-                        Log.e("Profile", "network", t);
-                    }
-                });
+                } else {
+                    Log.e("Profile", "GET /profile failed " + r.code());
+                }
+            }
+            @Override public void onFailure(Call<UserProfileResponseDTO> c, Throwable t) {
+                Log.e("Profile", "network", t);
+            }
+        });
     }
-
     /* ---------------- logout ---------------- */
 
     private void showLogoutDialog() {

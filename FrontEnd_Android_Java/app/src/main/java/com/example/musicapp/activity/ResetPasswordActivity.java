@@ -5,18 +5,23 @@ import android.os.Bundle;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
-import androidx.appcompat.app.AppCompatActivity;
-import com.example.musicapp.R;
 
-import java.io.OutputStream;
-import java.net.HttpURLConnection;
-import java.net.URL;
+import androidx.appcompat.app.AppCompatActivity;
+
+import com.example.musicapp.R;
+import com.example.musicapp.api.ResetPasswordAPI;
+import com.example.musicapp.dto.PasswordResetRequestDTO;
+import com.example.musicapp.ultis.RetrofitService;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class ResetPasswordActivity extends AppCompatActivity {
 
     private EditText edtPassword, edtConfirmNewPassword;
     private Button btnVerify;
-    private String email; // Passed from ForgotPasswordActivity
+    private String email;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -25,7 +30,7 @@ public class ResetPasswordActivity extends AppCompatActivity {
 
         edtPassword = findViewById(R.id.edtPassword);
         edtConfirmNewPassword = findViewById(R.id.edtConfirmNewPassword);
-        btnVerify = findViewById(R.id.btnVerify); // Make sure button has id in XML
+        btnVerify = findViewById(R.id.btnVerify);
 
         email = getIntent().getStringExtra("email");
 
@@ -46,40 +51,33 @@ public class ResetPasswordActivity extends AppCompatActivity {
             return;
         }
 
-        new Thread(() -> {
-            try {
-                URL url = new URL("http://172.31.96.1:8080/api/auth/reset-password");
-                HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-                conn.setRequestMethod("POST");
-                conn.setRequestProperty("Content-Type", "application/json");
-                conn.setDoOutput(true);
+        ResetPasswordAPI api = RetrofitService.getInstance(this).createService(ResetPasswordAPI.class);
+        PasswordResetRequestDTO request = new PasswordResetRequestDTO(email, password);
 
-                String jsonInput = "{\"email\":\"" + email + "\",\"password\":\"" + password + "\"}";
-
-                try (OutputStream os = conn.getOutputStream()) {
-                    byte[] input = jsonInput.getBytes("utf-8");
-                    os.write(input, 0, input.length);
-                }
-
-                int responseCode = conn.getResponseCode();
-                if (responseCode == HttpURLConnection.HTTP_OK) {
-                    runOnUiThread(() -> {
-                        Toast.makeText(this, "Password reset successful!", Toast.LENGTH_SHORT).show();
-                        startActivity(new Intent(this, LoginActivity.class)); // Optional: redirect to login
-                        finish();
-                    });
+        api.resetPassword(request).enqueue(new Callback<Void>() {
+            @Override
+            public void onResponse(Call<Void> call, Response<Void> response) {
+                if (response.isSuccessful()) {
+                    Toast.makeText(ResetPasswordActivity.this, "Password reset successful!", Toast.LENGTH_SHORT).show();
+                    startActivity(new Intent(ResetPasswordActivity.this, LoginActivity.class));
+                    finish();
                 } else {
-                    runOnUiThread(() ->
-                            Toast.makeText(this, "Failed to reset password", Toast.LENGTH_SHORT).show()
-                    );
+                    try {
+                        String errorMessage = response.errorBody() != null
+                                ? response.errorBody().string()
+                                : "Unknown error occurred";
+                        Toast.makeText(ResetPasswordActivity.this, errorMessage, Toast.LENGTH_LONG).show();
+                    } catch (Exception e) {
+                        Toast.makeText(ResetPasswordActivity.this, "Failed to read error response", Toast.LENGTH_SHORT).show();
+                    }
                 }
-
-            } catch (Exception e) {
-                e.printStackTrace();
-                runOnUiThread(() ->
-                        Toast.makeText(this, "Error: " + e.getMessage(), Toast.LENGTH_LONG).show()
-                );
             }
-        }).start();
+
+            @Override
+            public void onFailure(Call<Void> call, Throwable t) {
+                Toast.makeText(ResetPasswordActivity.this, "Error: " + t.getMessage(), Toast.LENGTH_LONG).show();
+            }
+        });
     }
+
 }
