@@ -1,7 +1,7 @@
 package com.example.musicapp.adapter;
 
 import android.content.Context;
-import android.content.Intent;
+import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -16,9 +16,11 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
 import com.example.musicapp.R;
-import com.example.musicapp.activity.LyricsActivity;
+import com.example.musicapp.activity.SongDetailActivity;
 import com.example.musicapp.api.PlaylistAPI;
 import com.example.musicapp.api.SongAPI;
+import com.example.musicapp.command.Command;
+import com.example.musicapp.command.NavigateToActivityCommand;
 import com.example.musicapp.dto.SongDTO;
 import com.example.musicapp.dto.SongRatingResponseDTO;
 import com.example.musicapp.ultis.RetrofitService;
@@ -33,10 +35,10 @@ import retrofit2.Response;
 
 public class SongAdapter extends RecyclerView.Adapter<SongAdapter.SongViewHolder> {
 
-    private List<SongDTO> songList;
-    private OnSongClickListener listener;
-    private Context context;
-    private SongAPI songAPI;
+    private final List<SongDTO> songList;
+    private final OnSongClickListener listener;
+    private final Context context;
+    private final SongAPI songAPI;
 
     private PlaylistAPI playlistAPI;
 
@@ -71,9 +73,9 @@ public class SongAdapter extends RecyclerView.Adapter<SongAdapter.SongViewHolder
                 .placeholder(R.drawable.placeholder)
                 .into(holder.coverImage);
 
-        songAPI.getUserRatingForSong(song.getId()).enqueue(new Callback<SongRatingResponseDTO>() {
+        songAPI.getUserRatingForSong(song.getId()).enqueue(new Callback<>() {
             @Override
-            public void onResponse(Call<SongRatingResponseDTO> call, Response<SongRatingResponseDTO> response) {
+            public void onResponse(@NonNull Call<SongRatingResponseDTO> call,@NonNull Response<SongRatingResponseDTO> response) {
                 if (response.isSuccessful() && response.body() != null) {
                     String userRating = response.body().getRating();
                     if ("like".equals(userRating)) {
@@ -92,7 +94,7 @@ public class SongAdapter extends RecyclerView.Adapter<SongAdapter.SongViewHolder
             }
 
             @Override
-            public void onFailure(Call<SongRatingResponseDTO> call, Throwable t) {
+            public void onFailure(@NonNull Call<SongRatingResponseDTO> call,@NonNull Throwable t) {
                 Log.e("SongAdapter", "getUserRating error", t);
             }
         });
@@ -106,12 +108,19 @@ public class SongAdapter extends RecyclerView.Adapter<SongAdapter.SongViewHolder
             popup.inflate(R.menu.song_menu);
             popup.setOnMenuItemClickListener(item -> {
                 int itemId = item.getItemId();
-                if (itemId == R.id.menu_lyrics) {
-                    Intent intent = new Intent(context, LyricsActivity.class);
-                    intent.putExtra("title", song.getTitle());
-                    intent.putExtra("artist", song.getArtist());
-                    intent.putExtra("lyrics", song.getLyrics());
-                    context.startActivity(intent);
+                if (itemId == R.id.menu_song_detail) {
+                    //Bundle extras = new Bundle();
+                    //extras.putString("title", song.getTitle());
+                    //extras.putString("artist", song.getArtist());
+                    //extras.putString("lyrics", song.getLyrics());
+                    //extras.putString("description", song.getDescription());
+                    //extras.putString("license", song.getLicense());
+
+                    Bundle extras = new Bundle();
+                    extras.putSerializable("song", song);  // Truyền đối tượng Song qua Bundle
+
+                    Command goToSongDetail = new NavigateToActivityCommand(context, SongDetailActivity.class, extras);
+                    goToSongDetail.execute();
                     return true;
                 } else if (itemId == R.id.menu_add_to_playlist) {
                     showPlaylistDialog(song);
@@ -124,16 +133,24 @@ public class SongAdapter extends RecyclerView.Adapter<SongAdapter.SongViewHolder
 
         // Handle like button click
         holder.likeButton.setOnClickListener(v -> {
-            songAPI.likeSong(song.getId()).enqueue(new Callback<Void>() {
+            songAPI.likeSong(song.getId()).enqueue(new Callback<>() {
                 @Override
-                public void onResponse(Call<Void> call, Response<Void> response) {
-                    holder.likeButton.setImageResource(R.drawable.ic_like_filled); // Icon đầy
-                    holder.dislikeButton.setImageResource(R.drawable.ic_dislike_empty); // Icon trống
-                    Toast.makeText(context, "Liked " + song.getTitle(), Toast.LENGTH_SHORT).show();
+                public void onResponse(@NonNull Call<SongRatingResponseDTO> call,@NonNull Response<SongRatingResponseDTO> response) {
+                    if (response.isSuccessful() && response.body() != null) {
+                        String userRating = response.body().getRating();
+                        if ("Rating updated".equals(userRating)) {
+                            holder.likeButton.setImageResource(R.drawable.ic_like_filled); // Icon đầy
+                            holder.dislikeButton.setImageResource(R.drawable.ic_dislike_empty); // Icon trống
+                            Toast.makeText(context, "Liked " + song.getTitle(), Toast.LENGTH_SHORT).show();
+                        }
+                    } else {
+                        Log.e("SongAdapter", "likeSong failed: " + response.code() + ", " + response.message());
+                    }
+
                 }
 
                 @Override
-                public void onFailure(Call<Void> call, Throwable t) {
+                public void onFailure(@NonNull Call<SongRatingResponseDTO> call,@NonNull Throwable t) {
                     Toast.makeText(context, "Failed to like", Toast.LENGTH_SHORT).show();
                 }
             });
@@ -141,16 +158,25 @@ public class SongAdapter extends RecyclerView.Adapter<SongAdapter.SongViewHolder
 
         // Handle dislike button click
         holder.dislikeButton.setOnClickListener(v -> {
-            songAPI.dislikeSong(song.getId()).enqueue(new Callback<Void>() {
+            songAPI.dislikeSong(song.getId()).enqueue(new Callback<SongRatingResponseDTO>() {
                 @Override
-                public void onResponse(Call<Void> call, Response<Void> response) {
-                    holder.likeButton.setImageResource(R.drawable.ic_like_empty); // Icon trống
-                    holder.dislikeButton.setImageResource(R.drawable.ic_dislike_filled); // Icon đầy
-                    Toast.makeText(context, "Disliked " + song.getTitle(), Toast.LENGTH_SHORT).show();
+                public void onResponse(@NonNull Call<SongRatingResponseDTO> call,@NonNull Response<SongRatingResponseDTO> response) {
+                    if (response.isSuccessful() && response.body() != null) {
+                        String userRating = response.body().getRating();
+                        if ("Rating updated".equals(userRating)) {
+                            holder.likeButton.setImageResource(R.drawable.ic_like_empty); // Icon trống
+                            holder.dislikeButton.setImageResource(R.drawable.ic_dislike_filled); // Icon đầy
+                            Toast.makeText(context, "Disliked " + song.getTitle(), Toast.LENGTH_SHORT).show();
+                        }
+                    } else {
+                        Log.e("SongAdapter", "dislikeSong failed: " + response.code() + ", " + response.message());
+                    }
+
+
                 }
 
                 @Override
-                public void onFailure(Call<Void> call, Throwable t) {
+                public void onFailure(@NonNull Call<SongRatingResponseDTO> call,@NonNull Throwable t) {
                     Toast.makeText(context, "Failed to dislike", Toast.LENGTH_SHORT).show();
                 }
             });

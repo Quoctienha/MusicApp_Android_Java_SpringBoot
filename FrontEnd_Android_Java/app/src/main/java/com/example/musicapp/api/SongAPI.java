@@ -19,10 +19,10 @@ public interface SongAPI {
     Call<List<SongDTO>> getTop10Songs();
 
     @PUT("/song/{id}/like")
-    Call<Void> likeSong(@Path("id") Long songId);
+    Call<SongRatingResponseDTO> likeSong(@Path("id") Long songId);
 
     @PUT("/song/{id}/dislike")
-    Call<Void> dislikeSong(@Path("id") Long songId);
+    Call<SongRatingResponseDTO> dislikeSong(@Path("id") Long songId);
 
     @PUT("/song/{id}/view")
     Call<Void> incrementView(@Path("id") Long songId);

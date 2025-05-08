@@ -29,6 +29,8 @@ public class Song {
 
     @Column(name = "lyrics", columnDefinition = "TEXT")
     private String lyrics;
+    private String description;
+    private String license;
 
     private int likes;
     private int dislikes;

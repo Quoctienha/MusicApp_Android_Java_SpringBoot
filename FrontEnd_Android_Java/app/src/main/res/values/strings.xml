@@ -30,6 +30,8 @@
     <string name="like">Like</string>
     <string name="dislike">Dislike</string>
     <string name="more">More</string>
+    <string name="song_s_details">Song\'s details</string>
+    <string name="add_playlist">Add Playlist</string>
 
 
 </resources>

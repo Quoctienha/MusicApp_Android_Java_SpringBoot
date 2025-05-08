@@ -119,10 +119,12 @@ public class PlaylistService {
                 .map(song -> new SongDTO(
                         song.getId(),
                         song.getTitle(),
-                        song.getArtist() != null ? song.getArtist().getFullName() : "Unknown",
+                        song.getArtist() != null ? song.getArtist().getStageName() : "Unknown",
                         song.getFileUrl(),
                         song.getImageUrl(),
                         song.getLyrics(),
+                        song.getDescription(),
+                        song.getLicense(),
                         song.getLikes(),
                         song.getDislikes(),
                         song.getViews()

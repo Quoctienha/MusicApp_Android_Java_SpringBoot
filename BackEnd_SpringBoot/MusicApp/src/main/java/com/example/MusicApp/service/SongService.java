@@ -1,6 +1,7 @@
 package com.example.MusicApp.service;
 
 import com.example.MusicApp.DTO.SongDTO;
+import com.example.MusicApp.DTO.SongRatingResponseDTO;
 import com.example.MusicApp.model.Account;
 import com.example.MusicApp.model.Song;
 import com.example.MusicApp.model.SongRating;
@@ -10,7 +11,6 @@ import com.example.MusicApp.repository.SongRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.Data;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
@@ -37,10 +37,12 @@ public class SongService {
                 .map(song -> new SongDTO(
                         song.getId(),
                         song.getTitle(),
-                        song.getArtist() != null ? song.getArtist().getFullName() : "Unknown",
+                        song.getArtist() != null ? song.getArtist().getStageName() : "Unknown",
                         song.getFileUrl(),
                         song.getImageUrl(),
                         song.getLyrics(),
+                        song.getDescription(),
+                        song.getLicense(),
                         song.getLikes(),
                         song.getDislikes(),
                         song.getViews()
@@ -54,10 +56,12 @@ public class SongService {
                 .map(song -> new SongDTO(
                         song.getId(),
                         song.getTitle(),
-                        song.getArtist() != null ? song.getArtist().getFullName() : "Unknown",
+                        song.getArtist() != null ? song.getArtist().getStageName() : "Unknown",
                         song.getFileUrl(),
                         song.getImageUrl(),
                         song.getLyrics(),
+                        song.getDescription(),
+                        song.getLicense(),
                         song.getLikes(),
                         song.getDislikes(),
                         song.getViews()
@@ -65,7 +69,7 @@ public class SongService {
                 .collect(Collectors.toList());
     }
 
-    public ResponseEntity<String> addRating(Long songId, boolean isLike) {
+    public SongRatingResponseDTO addRating(Long songId, boolean isLike) {
         //Lấy username từ SecurityContext
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
 
@@ -97,7 +101,7 @@ public class SongService {
         // Cập nhật lại tổng số like/dislike cho bài hát
         updateSongRatingCounts(song);
 
-        return ResponseEntity.ok("Rating updated");
+        return new SongRatingResponseDTO("Rating updated");
     }
 
     private void updateSongRatingCounts(Song song) {

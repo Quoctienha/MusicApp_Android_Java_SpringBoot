@@ -15,6 +15,8 @@ public class SongDTO {
     private String fileUrl;
     private String imageUrl;
     private String lyrics;
+    private String description;
+    private String license;
     private int likes;
     private int dislikes;
     private int views;

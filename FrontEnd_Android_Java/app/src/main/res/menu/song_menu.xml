@@ -3,15 +3,15 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <item
-        android:id="@+id/menu_lyrics"
-        android:title="Lyrics"
+        android:id="@+id/menu_song_detail"
+        android:title="@string/song_s_details"
         android:icon="@drawable/ic_lyrics"
         app:showAsAction="ifRoom"
         android:orderInCategory="100" />
 
     <item
         android:id="@+id/menu_add_to_playlist"
-        android:title="Add Playlist"
+        android:title="@string/add_playlist"
         android:icon="@drawable/ic_add_playlist"
         app:showAsAction="never"
         android:orderInCategory="400" />

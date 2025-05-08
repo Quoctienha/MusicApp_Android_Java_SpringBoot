@@ -30,13 +30,13 @@ public class SongController {
     }
 
     @PutMapping("/{id}/like")
-    public ResponseEntity<String> likeSong(@PathVariable Long id) {
-        return songService.addRating(id, true);
+    public ResponseEntity<SongRatingResponseDTO> likeSong(@PathVariable Long id) {
+        return ResponseEntity.ok(songService.addRating(id, true));
     }
 
     @PutMapping("/{id}/dislike")
-    public ResponseEntity<String> dislikeSong(@PathVariable Long id) {
-        return songService.addRating(id, false);
+    public ResponseEntity<SongRatingResponseDTO> dislikeSong(@PathVariable Long id) {
+        return ResponseEntity.ok(songService.addRating(id, false));
     }
 
     @GetMapping("/{songId}/rating")
