@@ -1,13 +1,12 @@
 package com.example.musicapp.adapter;
 
 import android.content.Context;
-import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
-import android.widget.PopupMenu;
+import android.widget.PopupMenu; // Import PopupMenu
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -15,18 +14,12 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
-import com.example.musicapp.R;
-import com.example.musicapp.activity.SongDetailActivity;
-import com.example.musicapp.api.PlaylistAPI;
+import com.example.musicapp.R; // Import lớp R của project
 import com.example.musicapp.api.SongAPI;
-import com.example.musicapp.command.Command;
-import com.example.musicapp.command.NavigateToActivityCommand;
 import com.example.musicapp.dto.SongDTO;
-import com.example.musicapp.dto.SongRatingResponseDTO;
 import com.example.musicapp.ultis.RetrofitService;
-import com.example.musicapp.dto.PlaylistDTO;
 
-import java.util.ArrayList;
+import java.util.ArrayList; // Dùng ArrayList
 import java.util.List;
 
 import retrofit2.Call;
@@ -35,227 +28,154 @@ import retrofit2.Response;
 
 public class SongAdapter extends RecyclerView.Adapter<SongAdapter.SongViewHolder> {
 
-    private final List<SongDTO> songList;
-    private final OnSongClickListener listener;
-    private final Context context;
-    private final SongAPI songAPI;
+    private Context context;
+    private List<SongDTO> songList; // Dùng List interface nhưng khởi tạo bằng ArrayList
+    private OnSongClickListener listener; // Listener interface
 
-    private PlaylistAPI playlistAPI;
-
-
-    public SongAdapter(Context context, List<SongDTO> songList, OnSongClickListener listener) {
-        this.context = context;
-        this.songList = songList;
-        this.listener = listener;
-        this.songAPI = RetrofitService.getInstance(context).createService(SongAPI.class);
-        this.playlistAPI = RetrofitService.getInstance(context).createService(PlaylistAPI.class);
-    }
-
+    // Interface để xử lý click từ Fragment/Activity
     public interface OnSongClickListener {
         void onSongClick(SongDTO song);
+        // Có thể thêm các hành động khác nếu cần, ví dụ:
+        // void onAddToPlaylistClick(SongDTO song);
+        // void onViewLyricsClick(SongDTO song);
+    }
+
+    // Constructor nhận Context, danh sách bài hát và listener
+    public SongAdapter(Context context, List<SongDTO> songList, OnSongClickListener listener) {
+        this.context = context;
+        // Luôn khởi tạo bằng ArrayList để đảm bảo các phương thức clear/add/set hoạt động
+        this.songList = (songList != null) ? new ArrayList<>(songList) : new ArrayList<>();
+        this.listener = listener;
     }
 
     @NonNull
     @Override
     public SongViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.item_song, parent, false);
+        // Inflate layout cho từng item
+        View view = LayoutInflater.from(context).inflate(R.layout.item_song, parent, false);
         return new SongViewHolder(view);
     }
 
     @Override
     public void onBindViewHolder(@NonNull SongViewHolder holder, int position) {
+        // Lấy dữ liệu của bài hát tại vị trí position
         SongDTO song = songList.get(position);
-        holder.titleText.setText(song.getTitle());
-        holder.artistText.setText(song.getArtist());
-        Glide.with(holder.itemView.getContext())
-                .load(song.getImageUrl())
-                .placeholder(R.drawable.placeholder)
-                .into(holder.coverImage);
-
-        songAPI.getUserRatingForSong(song.getId()).enqueue(new Callback<>() {
-            @Override
-            public void onResponse(@NonNull Call<SongRatingResponseDTO> call,@NonNull Response<SongRatingResponseDTO> response) {
-                if (response.isSuccessful() && response.body() != null) {
-                    String userRating = response.body().getRating();
-                    if ("like".equals(userRating)) {
-                        holder.likeButton.setImageResource(R.drawable.ic_like_filled); // Icon đầy
-                        holder.dislikeButton.setImageResource(R.drawable.ic_dislike_empty); // Icon trống
-                    } else if ("dislike".equals(userRating)) {
-                        holder.likeButton.setImageResource(R.drawable.ic_like_empty); // Icon trống
-                        holder.dislikeButton.setImageResource(R.drawable.ic_dislike_filled); // Icon đầy
-                    } else {
-                        holder.likeButton.setImageResource(R.drawable.ic_like_empty); // Icon trống
-                        holder.dislikeButton.setImageResource(R.drawable.ic_dislike_empty); // Icon trống
-                    }
-                } else {
-                    Log.e("SongAdapter", "getUserRating failed: " + response.code() + ", " + response.message());
-                }
-            }
-
-            @Override
-            public void onFailure(@NonNull Call<SongRatingResponseDTO> call,@NonNull Throwable t) {
-                Log.e("SongAdapter", "getUserRating error", t);
-            }
-        });
-
-
-
-        holder.itemView.setOnClickListener(v -> listener.onSongClick(song));
-
-        holder.menuButton.setOnClickListener(v -> {
-            PopupMenu popup = new PopupMenu(context, holder.menuButton);
-            popup.inflate(R.menu.song_menu);
-            popup.setOnMenuItemClickListener(item -> {
-                int itemId = item.getItemId();
-                if (itemId == R.id.menu_song_detail) {
-                    //Bundle extras = new Bundle();
-                    //extras.putString("title", song.getTitle());
-                    //extras.putString("artist", song.getArtist());
-                    //extras.putString("lyrics", song.getLyrics());
-                    //extras.putString("description", song.getDescription());
-                    //extras.putString("license", song.getLicense());
-
-                    Bundle extras = new Bundle();
-                    extras.putSerializable("song", song);  // Truyền đối tượng Song qua Bundle
-
-                    Command goToSongDetail = new NavigateToActivityCommand(context, SongDetailActivity.class, extras);
-                    goToSongDetail.execute();
-                    return true;
-                } else if (itemId == R.id.menu_add_to_playlist) {
-                    showPlaylistDialog(song);
-                    return true;
-                }
-                return false;
-            });
-            popup.show();
-        });
-
-        // Handle like button click
-        holder.likeButton.setOnClickListener(v -> {
-            songAPI.likeSong(song.getId()).enqueue(new Callback<>() {
-                @Override
-                public void onResponse(@NonNull Call<SongRatingResponseDTO> call,@NonNull Response<SongRatingResponseDTO> response) {
-                    if (response.isSuccessful() && response.body() != null) {
-                        String userRating = response.body().getRating();
-                        if ("Rating updated".equals(userRating)) {
-                            holder.likeButton.setImageResource(R.drawable.ic_like_filled); // Icon đầy
-                            holder.dislikeButton.setImageResource(R.drawable.ic_dislike_empty); // Icon trống
-                            Toast.makeText(context, "Liked " + song.getTitle(), Toast.LENGTH_SHORT).show();
-                        }
-                    } else {
-                        Log.e("SongAdapter", "likeSong failed: " + response.code() + ", " + response.message());
-                    }
-
-                }
-
-                @Override
-                public void onFailure(@NonNull Call<SongRatingResponseDTO> call,@NonNull Throwable t) {
-                    Toast.makeText(context, "Failed to like", Toast.LENGTH_SHORT).show();
-                }
-            });
-        });
-
-        // Handle dislike button click
-        holder.dislikeButton.setOnClickListener(v -> {
-            songAPI.dislikeSong(song.getId()).enqueue(new Callback<SongRatingResponseDTO>() {
-                @Override
-                public void onResponse(@NonNull Call<SongRatingResponseDTO> call,@NonNull Response<SongRatingResponseDTO> response) {
-                    if (response.isSuccessful() && response.body() != null) {
-                        String userRating = response.body().getRating();
-                        if ("Rating updated".equals(userRating)) {
-                            holder.likeButton.setImageResource(R.drawable.ic_like_empty); // Icon trống
-                            holder.dislikeButton.setImageResource(R.drawable.ic_dislike_filled); // Icon đầy
-                            Toast.makeText(context, "Disliked " + song.getTitle(), Toast.LENGTH_SHORT).show();
-                        }
-                    } else {
-                        Log.e("SongAdapter", "dislikeSong failed: " + response.code() + ", " + response.message());
-                    }
-
-
-                }
-
-                @Override
-                public void onFailure(@NonNull Call<SongRatingResponseDTO> call,@NonNull Throwable t) {
-                    Toast.makeText(context, "Failed to dislike", Toast.LENGTH_SHORT).show();
-                }
-            });
-        });
+        // Gắn dữ liệu vào ViewHolder và truyền listener
+        holder.bind(song, listener);
     }
-
-    private void showPlaylistDialog(SongDTO song) {
-        PlaylistAPI playlistAPI = RetrofitService.getInstance(context).createService(PlaylistAPI.class);
-
-        playlistAPI.getAllPlaylists().enqueue(new Callback<List<PlaylistDTO>>() {
-            @Override
-            public void onResponse(Call<List<PlaylistDTO>> call, Response<List<PlaylistDTO>> response) {
-                if (response.isSuccessful() && response.body() != null) {
-                    List<PlaylistDTO> allPlaylists = response.body();
-
-                    // Lọc ra các playlist chưa chứa bài hát
-                    List<PlaylistDTO> availablePlaylists = new ArrayList<>();
-                    for (PlaylistDTO p : allPlaylists) {
-                        if (p.getSongIds() == null || !p.getSongIds().contains(song.getId())) {
-                            availablePlaylists.add(p);
-                        }
-                    }
-
-                    if (availablePlaylists.isEmpty()) {
-                        Toast.makeText(context, "All playlists already contain this song", Toast.LENGTH_SHORT).show();
-                        return;
-                    }
-
-                    String[] playlistNames = new String[availablePlaylists.size()];
-                    for (int i = 0; i < availablePlaylists.size(); i++) {
-                        playlistNames[i] = availablePlaylists.get(i).getName();
-                    }
-
-                    new android.app.AlertDialog.Builder(context)
-                            .setTitle("Add to Playlist")
-                            .setItems(playlistNames, (dialog, which) -> {
-                                PlaylistDTO selected = availablePlaylists.get(which);
-                                playlistAPI.addSongToPlaylist(selected.getId(), song.getId()).enqueue(new Callback<PlaylistDTO>() {
-                                    @Override
-                                    public void onResponse(Call<PlaylistDTO> call, Response<PlaylistDTO> response) {
-                                        Toast.makeText(context, "Added to " + selected.getName(), Toast.LENGTH_SHORT).show();
-                                    }
-
-                                    @Override
-                                    public void onFailure(Call<PlaylistDTO> call, Throwable t) {
-                                        Toast.makeText(context, "Failed to add to playlist", Toast.LENGTH_SHORT).show();
-                                    }
-                                });
-                            })
-                            .show();
-                }
-            }
-
-            @Override
-            public void onFailure(Call<List<PlaylistDTO>> call, Throwable t) {
-                Toast.makeText(context, "Failed to fetch playlists", Toast.LENGTH_SHORT).show();
-            }
-        });
-    }
-
 
     @Override
     public int getItemCount() {
-        return songList != null ? songList.size() : 0;
+        // Trả về số lượng item trong danh sách
+        return (songList != null) ? songList.size() : 0;
+    }
+
+    // --- Các phương thức quản lý dữ liệu Adapter ---
+
+    /**
+     * Xóa tất cả bài hát khỏi danh sách và cập nhật RecyclerView.
+     */
+    public void clear() {
+        if (songList != null) {
+            int itemCount = songList.size();
+            if (itemCount > 0) { // Chỉ thông báo nếu có item bị xóa
+                songList.clear();
+                notifyItemRangeRemoved(0, itemCount);
+            }
+        }
+    }
+
+    public void setSongs(List<SongDTO> newSongs) {
+        // Gán lại list nội bộ (tạo bản sao)
+        this.songList = (newSongs != null) ? new ArrayList<>(newSongs) : new ArrayList<>();
+        notifyDataSetChanged(); // Thông báo toàn bộ dữ liệu thay đổi
+    }
+    public void addSongs(List<SongDTO> additionalSongs) {
+        if (this.songList != null && additionalSongs != null && !additionalSongs.isEmpty()) {
+            int startPosition = getItemCount(); // Vị trí bắt đầu thêm
+            this.songList.addAll(additionalSongs);
+            notifyItemRangeInserted(startPosition, additionalSongs.size()); // Thông báo item được chèn
+        }
+    }
+    public List<SongDTO> getCurrentList() {
+        return new ArrayList<>(this.songList != null ? this.songList : new ArrayList<>());
     }
 
     public static class SongViewHolder extends RecyclerView.ViewHolder {
-        TextView titleText, artistText;
-        ImageView coverImage, menuButton;
-        ImageView likeButton, dislikeButton;
+        ImageView songImageView;
+        TextView titleTextView;
+        TextView artistTextView;
+        ImageView moreOptionsImageView;
 
         public SongViewHolder(@NonNull View itemView) {
             super(itemView);
-            titleText = itemView.findViewById(R.id.songTitle);
-            artistText = itemView.findViewById(R.id.songArtist);
-            coverImage = itemView.findViewById(R.id.songCoverImage);
-            menuButton = itemView.findViewById(R.id.menu_button);
-            likeButton = itemView.findViewById(R.id.like_button);
-            dislikeButton = itemView.findViewById(R.id.dislike_button);
+
+            // --- Ánh xạ View dùng ID chính xác từ file res/layout/item_song.xml ---
+            songImageView = itemView.findViewById(R.id.songCoverImage);      // Sử dụng ID: songCoverImage
+            titleTextView = itemView.findViewById(R.id.songTitle);          // Sử dụng ID: songTitle
+            artistTextView = itemView.findViewById(R.id.songArtist);         // Sử dụng ID: songArtist
+            moreOptionsImageView = itemView.findViewById(R.id.menu_button);   // Sử dụng ID: menu_button
+
+            if (songImageView == null) {
+                Log.e("SongAdapter", "SongViewHolder: Could not find view with ID R.id.songCoverImage");
+            }
+            if (titleTextView == null) {
+                Log.e("SongAdapter", "SongViewHolder: Could not find view with ID R.id.songTitle");
+            }
+            if (artistTextView == null) {
+                Log.e("SongAdapter", "SongViewHolder: Could not find view with ID R.id.songArtist");
+            }
+            if (moreOptionsImageView == null) {
+                Log.e("SongAdapter", "SongViewHolder: Could not find view with ID R.id.menu_button (moreOptions)");
+            }
         }
-    }
-}
+
+        public void bind(final SongDTO song, final OnSongClickListener listener) {
+            if (titleTextView != null) {
+                titleTextView.setText(song.getTitle());
+            }
+            if (artistTextView != null) {
+                artistTextView.setText(song.getArtist());
+            }
+            if (songImageView != null && itemView != null) { // Thêm kiểm tra itemView
+                Glide.with(itemView.getContext())
+                        .load(song.getImageUrl())
+                        .placeholder(R.drawable.placeholder) // Ảnh chờ
+                        .error(R.drawable.placeholder)       // Ảnh lỗi
+                        .into(songImageView);
+            }
+
+            // Bắt sự kiện click vào toàn bộ item -> Gọi listener onSongClick
+            itemView.setOnClickListener(v -> {
+                if (listener != null) {
+                    listener.onSongClick(song);
+                }
+            });
+
+            // Bắt sự kiện click vào nút more options (nếu có)
+            if (moreOptionsImageView != null) {
+                moreOptionsImageView.setOnClickListener(v -> showPopupMenu(v, song));
+            } else {
+                // Log nếu không tìm thấy nút more options để debug layout
+                Log.w("SongAdapter", "moreOptionsImageView is null for item: " + (titleTextView != null ? titleTextView.getText() : "Unknown"));
+            }
+        }
+
+        // Hiển thị PopupMenu khi nhấn nút more options
+        private void showPopupMenu(View view, SongDTO song) {
+            Context context = view.getContext();
+            PopupMenu popup = new PopupMenu(context, view);
+            try {
+                // Inflate menu từ file res/menu/song_menu.xml
+                popup.inflate(R.menu.song_menu);
+            } catch (Exception e) {
+                Log.e("SongAdapter", "Error inflating song menu. Check res/menu/song_menu.xml", e);
+                Toast.makeText(context,"Cannot load song menu", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+
+            popup.show();
+        }
+    } // Kết thúc SongViewHolder
+} // Kết thúc SongAdapter

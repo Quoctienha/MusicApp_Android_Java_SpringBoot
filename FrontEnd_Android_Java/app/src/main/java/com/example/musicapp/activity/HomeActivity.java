@@ -1,69 +1,291 @@
 package com.example.musicapp.activity;
 
+import android.content.Context;
 import android.os.Bundle;
+import android.os.Handler; // Cần cho việc cập nhật BottomNav sau khi pop backstack
+import android.util.Log;
 import android.view.MenuItem;
+import android.view.View;
+import android.view.inputmethod.InputMethodManager;
+import android.widget.ImageView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
 
 import com.example.musicapp.Fragment.HomeFragment;
 import com.example.musicapp.Fragment.PlaylistFragment;
 import com.example.musicapp.Fragment.PremiumFragment;
 import com.example.musicapp.Fragment.ProfileFragment;
-import com.example.musicapp.Fragment.SubsciptionFragment;
+import com.example.musicapp.Fragment.SearchFragment;
+import com.example.musicapp.Fragment.SubsciptionFragment; // Đảm bảo tên class chính xác
 import com.example.musicapp.R;
+import com.example.musicapp.dto.SongDTO;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.navigation.NavigationBarView;
 
-public class HomeActivity extends AppCompatActivity {
+import java.util.List;
+
+public class HomeActivity extends AppCompatActivity implements SearchFragment.OnSearchResultSelectedListener {
 
     private BottomNavigationView bottomNavigationView;
+    private ImageView searchIconButton;
+
+    private static final String TAG = "HomeActivity";
+    private static final String HOME_FRAGMENT_TAG = "HOME_FRAGMENT_TAG";
+    private static final String SEARCH_FRAGMENT_TAG = "SEARCH_FRAGMENT_TAG";
+    private static final String PLAYLIST_FRAGMENT_TAG = "PLAYLIST_FRAGMENT_TAG";
+    private static final String SUBSCRIPTION_FRAGMENT_TAG = "SUBSCRIPTION_FRAGMENT_TAG";
+    private static final String PREMIUM_FRAGMENT_TAG = "PREMIUM_FRAGMENT_TAG";
+    private static final String PROFILE_FRAGMENT_TAG = "PROFILE_FRAGMENT_TAG";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_home);
+        setContentView(R.layout.activity_home); // Đảm bảo layout này chứa search_icon_button
 
         bottomNavigationView = findViewById(R.id.bottom_navigation);
+        searchIconButton = findViewById(R.id.search_icon_button); // ID từ activity_home.xml
 
-        // Default screen
         if (savedInstanceState == null) {
-            getSupportFragmentManager()
-                    .beginTransaction()
-                    .replace(R.id.fragment_container, new HomeFragment())
-                    .commit();
+            loadFragmentInternal(new HomeFragment(), HOME_FRAGMENT_TAG, false, true);
         }
 
-        bottomNavigationView.setOnItemSelectedListener(
-                new NavigationBarView.OnItemSelectedListener() {
-                    @Override
-                    public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+        setupBottomNavigationListener();
+        setupSearchIconListener();
+    }
 
-                        Fragment selectedFragment = null;
-                        int id = item.getItemId();
+    private void setupSearchIconListener() {
+        if (searchIconButton != null) {
+            searchIconButton.setOnClickListener(v -> {
+                Log.d(TAG, "Search icon button clicked. Opening SearchFragment.");
+                openSearchFragment();
+            });
+        } else {
+            Log.w(TAG, "searchIconButton is null in HomeActivity. Check activity_home.xml.");
+        }
+    }
 
-                        if (id == R.id.nav_home) {
-                            selectedFragment = new HomeFragment();
-                        } else if (id == R.id.nav_profile) {
-                            selectedFragment = new ProfileFragment();   // ← no args
-                        } else if (id == R.id.nav_premium) {
-                            selectedFragment = new PremiumFragment();
-                        } else if (id == R.id.nav_subscribed) {
-                            selectedFragment = new SubsciptionFragment();
-                        } else if (id == R.id.nav_playlist) {
-                            selectedFragment = new PlaylistFragment();
-                        }
+    private void setupBottomNavigationListener() {
+        bottomNavigationView.setOnItemSelectedListener(item -> {
+            Fragment selectedFragment = null;
+            String selectedTag = null;
+            boolean addToBackStack = true; // Mặc định các tab khác Home sẽ vào backstack
 
-                        if (selectedFragment != null) {
-                            getSupportFragmentManager()
-                                    .beginTransaction()
-                                    .replace(R.id.fragment_container, selectedFragment)
-                                    .commit();
-                            return true;
-                        }
-                        return false;
-                    }
-                });
+            int itemId = item.getItemId();
+            FragmentManager fm = getSupportFragmentManager();
+            Fragment currentFragment = fm.findFragmentById(R.id.fragment_container);
+
+            if (itemId == R.id.nav_home) {
+                if (!(currentFragment instanceof HomeFragment)) {
+                    selectedFragment = findOrCreateFragment(fm, HOME_FRAGMENT_TAG, HomeFragment.class);
+                    selectedTag = HOME_FRAGMENT_TAG;
+                    addToBackStack = false; // Home không tự thêm vào backstack khi chọn từ nav
+                } else {
+                    return true; // Đã ở Home
+                }
+            } else if (itemId == R.id.nav_subscribed) {
+                if (!(currentFragment instanceof SubsciptionFragment)) { // Nhớ kiểm tra tên Class
+                    selectedFragment = findOrCreateFragment(fm, SUBSCRIPTION_FRAGMENT_TAG, SubsciptionFragment.class);
+                    selectedTag = SUBSCRIPTION_FRAGMENT_TAG;
+                } else {
+                    return true;
+                }
+            } else if (itemId == R.id.nav_playlist) {
+                if (!(currentFragment instanceof PlaylistFragment)) {
+                    selectedFragment = findOrCreateFragment(fm, PLAYLIST_FRAGMENT_TAG, PlaylistFragment.class);
+                    selectedTag = PLAYLIST_FRAGMENT_TAG;
+                } else {
+                    return true;
+                }
+            } else if (itemId == R.id.nav_premium) {
+                if (!(currentFragment instanceof PremiumFragment)) {
+                    selectedFragment = findOrCreateFragment(fm, PREMIUM_FRAGMENT_TAG, PremiumFragment.class);
+                    selectedTag = PREMIUM_FRAGMENT_TAG;
+                } else {
+                    return true;
+                }
+            } else if (itemId == R.id.nav_profile) {
+                if (!(currentFragment instanceof ProfileFragment)) {
+                    selectedFragment = findOrCreateFragment(fm, PROFILE_FRAGMENT_TAG, ProfileFragment.class);
+                    selectedTag = PROFILE_FRAGMENT_TAG;
+                } else {
+                    return true;
+                }
+            }
+
+
+            if (selectedFragment != null) {
+                if (currentFragment instanceof SearchFragment) {
+                    fm.popBackStack(SEARCH_FRAGMENT_TAG, FragmentManager.POP_BACK_STACK_INCLUSIVE);
+                }
+                loadFragmentInternal(selectedFragment, selectedTag, addToBackStack, false);
+                return true;
+            }
+            return false;
+        });
+    }
+
+    private <T extends Fragment> T findOrCreateFragment(FragmentManager fm, String tag, Class<T> fragmentClass) {
+        Fragment fragment = fm.findFragmentByTag(tag);
+        if (fragment == null) {
+            try {
+                fragment = fragmentClass.newInstance();
+                Log.d(TAG, "Creating new instance of " + fragmentClass.getSimpleName() + " with tag: " + tag);
+            } catch (IllegalAccessException | java.lang.InstantiationException e) {
+                Log.e(TAG, "Error creating fragment: " + fragmentClass.getSimpleName(), e);
+                return null;
+            }
+        } else {
+            Log.d(TAG, "Reusing existing instance of " + fragmentClass.getSimpleName() + " with tag: " + tag);
+        }
+        if (fragmentClass.isInstance(fragment)) {
+            return fragmentClass.cast(fragment);
+        } else {
+            Log.e(TAG, "Fragment with tag " + tag + " is not of type " + fragmentClass.getSimpleName() + ". Forcing new instance.");
+            try {
+                fragment = fragmentClass.newInstance();
+                return fragmentClass.cast(fragment);
+            } catch (IllegalAccessException | java.lang.InstantiationException e) {
+                Log.e(TAG, "Error creating fragment: " + fragmentClass.getSimpleName(), e);
+                return null;
+            }
+        }
+    }
+
+    public void openSearchFragment() {
+        SearchFragment searchFragment = new SearchFragment();
+        loadFragmentInternal(searchFragment, SEARCH_FRAGMENT_TAG, true, false);
+    }
+
+    private void loadFragmentInternal(Fragment fragment, String tag, boolean addToBackStack, boolean isInitialLoad) {
+        if (fragment == null) {
+            Log.e(TAG, "Attempting to load a null fragment. Tag: " + tag);
+            return;
+        }
+        FragmentManager fm = getSupportFragmentManager();
+        FragmentTransaction transaction = fm.beginTransaction();
+
+        transaction.replace(R.id.fragment_container, fragment, tag);
+
+        if (addToBackStack && !isInitialLoad) {
+            transaction.addToBackStack(tag);
+            Log.d(TAG, "Fragment " + tag + " added to back stack.");
+        }
+
+        try {
+            transaction.commit();
+            Log.d(TAG, "Fragment transaction committed for " + tag);
+        } catch (IllegalStateException e) {
+            Log.e(TAG, "Could not commit fragment transaction for " + tag, e);
+            // transaction.commitAllowingStateLoss(); // Cân nhắc kỹ!
+        }
+    }
+
+    @Override
+    public void onSearchResultSelected(SongDTO selectedSong, List<SongDTO> searchResultList) {
+        if (selectedSong == null) {
+            Log.e(TAG, "onSearchResultSelected: selectedSong is null!");
+            return;
+        }
+        Log.i(TAG, "HomeActivity: Received song from search: " + selectedSong.getTitle());
+        hideKeyboard();
+
+        FragmentManager fm = getSupportFragmentManager();
+        if (fm.findFragmentByTag(SEARCH_FRAGMENT_TAG) != null) {
+            fm.popBackStack(SEARCH_FRAGMENT_TAG, FragmentManager.POP_BACK_STACK_INCLUSIVE);
+            try {
+                fm.executePendingTransactions();
+            } catch (Exception e) {
+                Log.e(TAG, "Error executing pending transactions after popping SearchFragment: " + e.getMessage());
+            }
+        }
+
+        HomeFragment homeFragment = findOrCreateFragment(fm, HOME_FRAGMENT_TAG, HomeFragment.class);
+
+        if (!(fm.findFragmentById(R.id.fragment_container) instanceof HomeFragment)) {
+            Log.d(TAG, "HomeFragment not current, loading it via BottomNav selection.");
+            bottomNavigationView.setSelectedItemId(R.id.nav_home);
+            fm.executePendingTransactions();
+            homeFragment = (HomeFragment) fm.findFragmentByTag(HOME_FRAGMENT_TAG);
+        }
+
+
+        if (homeFragment != null && homeFragment.isAdded()) {
+            Log.d(TAG, "HomeFragment is ready. Delegating song playback to HomeFragment.");
+            homeFragment.playSongFromSearch(selectedSong, searchResultList);
+        } else {
+            Log.e(TAG, "HomeFragment is still null or not added after attempts. Cannot play song from search.");
+            Toast.makeText(this, "Lỗi: Không thể chuẩn bị giao diện để phát nhạc.", Toast.LENGTH_SHORT).show();
+            if (bottomNavigationView.getSelectedItemId() != R.id.nav_home) {
+                bottomNavigationView.setSelectedItemId(R.id.nav_home);
+            }
+        }
+    }
+
+    @Override
+    public void onBackPressed() {
+        FragmentManager fm = getSupportFragmentManager();
+        Fragment searchFragmentInstance = fm.findFragmentByTag(SEARCH_FRAGMENT_TAG);
+
+        if (searchFragmentInstance != null && searchFragmentInstance.isVisible()) {
+            Log.d(TAG, "Back pressed: SearchFragment is visible, popping it.");
+            fm.popBackStack(SEARCH_FRAGMENT_TAG, FragmentManager.POP_BACK_STACK_INCLUSIVE);
+            updateBottomNavSelectionAfterBackPress(fm);
+            return;
+        }
+
+        if (fm.getBackStackEntryCount() > 0) {
+            Log.d(TAG, "Back pressed: Popping general back stack.");
+            fm.popBackStackImmediate();
+            updateBottomNavSelectionAfterBackPress(fm);
+        } else {
+            Fragment currentFragment = fm.findFragmentById(R.id.fragment_container);
+            if (currentFragment instanceof HomeFragment) {
+                Log.d(TAG, "Back pressed: On HomeFragment with empty back stack. Exiting app.");
+                super.onBackPressed();
+            } else {
+                Log.w(TAG, "Back pressed: Not on HomeFragment and empty back stack. Defaulting to HomeFragment.");
+                loadFragmentInternal(findOrCreateFragment(fm, HOME_FRAGMENT_TAG, HomeFragment.class), HOME_FRAGMENT_TAG, false, true);
+                bottomNavigationView.setSelectedItemId(R.id.nav_home);
+            }
+        }
+    }
+
+    private void updateBottomNavSelectionAfterBackPress(FragmentManager fm) {
+        new Handler().postDelayed(() -> {
+            Fragment currentVisibleFragment = fm.findFragmentById(R.id.fragment_container);
+            Log.d(TAG, "Updating BottomNav selection after back press. Current fragment: " +
+                    (currentVisibleFragment != null ? currentVisibleFragment.getClass().getSimpleName() : "null"));
+
+            if (currentVisibleFragment instanceof HomeFragment) {
+                if (bottomNavigationView.getSelectedItemId() != R.id.nav_home) bottomNavigationView.setSelectedItemId(R.id.nav_home);
+            } else if (currentVisibleFragment instanceof SubsciptionFragment) {
+                if (bottomNavigationView.getSelectedItemId() != R.id.nav_subscribed) bottomNavigationView.setSelectedItemId(R.id.nav_subscribed);
+            } else if (currentVisibleFragment instanceof PlaylistFragment) {
+                if (bottomNavigationView.getSelectedItemId() != R.id.nav_playlist) bottomNavigationView.setSelectedItemId(R.id.nav_playlist);
+            } else if (currentVisibleFragment instanceof PremiumFragment) {
+                if (bottomNavigationView.getSelectedItemId() != R.id.nav_premium) bottomNavigationView.setSelectedItemId(R.id.nav_premium);
+            } else if (currentVisibleFragment instanceof ProfileFragment) {
+                if (bottomNavigationView.getSelectedItemId() != R.id.nav_profile) bottomNavigationView.setSelectedItemId(R.id.nav_profile);
+            }
+        }, 50); // Delay nhỏ
+    }
+
+    private void hideKeyboard() {
+        View view = this.getCurrentFocus();
+        if (view == null) { // Cần một view để lấy window token
+            view = new View(this);
+        }
+        InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+        if (imm != null && view.getWindowToken() != null) {
+            imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
+        } else {
+            Log.w(TAG, "Could not hide keyboard, no focus or imm is null.");
+        }
     }
 }

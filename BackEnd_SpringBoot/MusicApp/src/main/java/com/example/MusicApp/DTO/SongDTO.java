@@ -1,6 +1,5 @@
 package com.example.MusicApp.DTO;
 
-import com.example.MusicApp.model.Song;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;

@@ -8,7 +8,6 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -45,7 +44,6 @@ public class HomeFragment extends Fragment {
     private TextView songTitleTextView;
     private TextView songArtistTextView;
     private TextView startTimeTextView, endTimeTextView;
-
     private Handler handler = new Handler();
 
     private static final String TAG = "PLAYER";
@@ -282,5 +280,36 @@ public class HomeFragment extends Fragment {
         releasePlayer();
         handler.removeCallbacksAndMessages(null);
     }
-}
 
+    // Xử lý phát bài hát từ kết quả tìm kiếm
+    public void playSongFromSearch(SongDTO selectedSong, List<SongDTO> searchResultList) {
+        if (selectedSong == null || searchResultList == null) {
+            Log.e(TAG, "playSongFromSearch: selectedSong or searchResultList is null!");
+            return;
+        }
+
+        // Cập nhật danh sách bài hát và chỉ số bài hát hiện tại
+        songList = searchResultList;
+        currentSongIndex = searchResultList.indexOf(selectedSong);
+
+        // Dừng bài hát hiện tại nếu đang phát
+        if (isPlaying) {
+            stopMusic();
+        }
+
+        // Cập nhật thông tin bài hát và bắt đầu phát
+        updateSongInfo(selectedSong);
+        startMusic(selectedSong.getFileUrl());
+
+        // Cập nhật adapter để hiển thị danh sách bài hát mới
+        SongAdapter adapter = new SongAdapter(requireContext(), songList, song -> {
+            if (isPlaying) {
+                stopMusic();
+            }
+            currentSongIndex = songList.indexOf(song);
+            updateSongInfo(song);
+            Log.d(TAG, "Selected song from search: " + song.getTitle() + " by " + song.getArtist());
+        });
+        trendingMusicRecycler.setAdapter(adapter);
+    }
+}
