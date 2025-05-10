@@ -22,9 +22,9 @@ public class LoginController {
     @Autowired
     private final LoginService loginService;
 
-    @PostMapping("/login")
+    @PostMapping("/app-login")
     public ResponseEntity<LoginResponseDTO> login(@RequestBody LoginRequestDTO request) {
-        return ResponseEntity.ok(loginService.login(request));
+        return ResponseEntity.ok(loginService.applogin(request));
     }
 
     @PostMapping("/refresh-token")

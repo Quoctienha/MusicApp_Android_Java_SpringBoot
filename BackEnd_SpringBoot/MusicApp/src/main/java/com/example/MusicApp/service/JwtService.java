@@ -13,10 +13,10 @@ public class JwtService {
 
     private static final Key SECRET_KEY = Keys.secretKeyFor(SignatureAlgorithm.HS256);
     // Access Token: 5 phút
-    private static final long ACCESS_TOKEN_EXPIRATION = 1000 * 60 * 5;
+    private static final long ACCESS_TOKEN_EXPIRATION = 1000 * 60;
 
-    // Refresh Token: 7 ngày
-    private static final long REFRESH_TOKEN_EXPIRATION = 1000L * 60 * 60 * 24 * 7;
+    // Refresh Token: 7 ngày60 *24 * 7
+    private static final long REFRESH_TOKEN_EXPIRATION = 1000L * 60 * 2;
 
     public String generateAccessToken(String username) {
         return buildToken(username, ACCESS_TOKEN_EXPIRATION, null);
@@ -44,6 +44,22 @@ public class JwtService {
     public String extractUsername(String token) {
         return extractAllClaims(token).getSubject();
     }
+
+    public String extractUsernameIgnoreExpiration(String token) {
+        try {
+            Claims claims = Jwts.parserBuilder()
+                    .setSigningKey(SECRET_KEY)
+                    .build()
+                    .parseClaimsJws(token)
+                    .getBody();
+            return claims.getSubject();
+        } catch (ExpiredJwtException ex) {
+            return ex.getClaims().getSubject(); // Token hết hạn vẫn lấy được username
+        } catch (JwtException e) {
+            return null; // Token không hợp lệ
+        }
+    }
+
 
     private Claims extractAllClaims(String token) {
         return Jwts.parserBuilder()

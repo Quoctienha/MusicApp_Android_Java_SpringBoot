@@ -10,6 +10,6 @@ import lombok.Setter;
 @Getter
 @Setter
 public class Artist extends User {
-
+    private String stageName;
 }
 

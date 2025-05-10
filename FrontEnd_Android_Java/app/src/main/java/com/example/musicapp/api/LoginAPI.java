@@ -9,8 +9,8 @@ import retrofit2.http.Body;
 import retrofit2.http.POST;
 
 public interface LoginAPI {
-    @POST("/api/auth/login")
-    Call<LoginResponseDTO> login(@Body LoginRequestDTO loginRequest);
+    @POST("/api/auth/app-login")
+    Call<LoginResponseDTO> applogin(@Body LoginRequestDTO loginRequest);
 
     @POST("/api/auth/refresh-token")
     Call<LoginResponseDTO> refreshToken(@Body RefreshTokenRequestDTO Request);

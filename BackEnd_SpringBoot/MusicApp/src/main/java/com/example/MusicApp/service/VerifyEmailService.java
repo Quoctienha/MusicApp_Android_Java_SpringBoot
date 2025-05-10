@@ -4,6 +4,7 @@ import com.example.MusicApp.model.Account;
 import com.example.MusicApp.model.VerificationToken;
 import com.example.MusicApp.repository.AccountRepository;
 import com.example.MusicApp.repository.VerificationTokenRepository;
+import lombok.Data;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -12,6 +13,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 @Service
+@Data
 public class VerifyEmailService {
 
     @Autowired
@@ -35,7 +37,7 @@ public class VerifyEmailService {
 
 
 
-        String link = "http://172.31.96.1:8080/api/auth/verify-email?token=" + token;
+        String link = "http://192.168.0.17:8080/api/auth/verify-email?token=" + token;
 
         String subject = "Xác thực tài khoản Music App";
 

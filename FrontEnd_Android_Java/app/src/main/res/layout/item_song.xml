@@ -55,18 +55,48 @@
                 android:text="Artist"
                 android:textColor="#CCCCCC"
                 android:textSize="14sp" />
+            <!-- Like and Dislike buttons -->
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginTop="8dp">
+
+                <!-- Like Button (Empty heart) -->
+                <ImageView
+                    android:id="@+id/like_button"
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:padding="8dp"
+                    android:src="@drawable/ic_like_empty"
+                    android:contentDescription="@string/like"
+                    android:layout_marginEnd="16dp"
+                    android:clickable="true"
+                    android:focusable="true" />
+
+                <!-- Dislike Button (Empty heart) -->
+                <ImageView
+                    android:id="@+id/dislike_button"
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:padding="8dp"
+                    android:src="@drawable/ic_dislike_empty"
+                    android:contentDescription="@string/dislike"
+                    android:clickable="true"
+                    android:focusable="true" />
+            </LinearLayout>
         </LinearLayout>
 
         <!-- Nút 3 chấm menu -->
         <ImageView
             android:id="@+id/menu_button"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:padding="8dp"
             android:layout_alignParentEnd="true"
             android:layout_centerVertical="true"
             android:src="@drawable/ic_more_vert"
-            android:contentDescription="More"
-            android:padding="8dp"
+            android:contentDescription="@string/more"
             android:clickable="true"
             android:focusable="true" />
     </RelativeLayout>

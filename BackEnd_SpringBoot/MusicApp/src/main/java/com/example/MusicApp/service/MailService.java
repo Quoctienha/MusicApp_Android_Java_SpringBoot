@@ -2,6 +2,7 @@ package com.example.MusicApp.service;
 
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
+import lombok.Data;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
@@ -10,6 +11,7 @@ import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
 
 @Service
+@Data
 public class MailService {
 
     @Autowired
@@ -18,7 +20,7 @@ public class MailService {
     @Autowired
     private TemplateEngine templateEngine;
 
-    // ✅ For account verification using link
+    //For account verification using link
     public void send(String to, String subject, String username, String link) {
         try {
             Context context = new Context();
@@ -42,7 +44,7 @@ public class MailService {
         }
     }
 
-    // ✅ For password reset using a code
+    //For password reset using a code
     public void sendResetCodeEmail(String to, String subject, String username, String code) {
         try {
             System.out.println("Sending reset code to: " + to);

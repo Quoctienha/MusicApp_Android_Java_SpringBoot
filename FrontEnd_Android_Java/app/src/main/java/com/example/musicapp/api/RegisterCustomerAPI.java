@@ -14,8 +14,4 @@ public interface RegisterCustomerAPI {
     @POST("/api/auth/register-customer")
     Call<RegisterResponseDTO> registerCustomer(@Body RegisterRequestDTO request);
 
-//    @GET("/api/auth/verify-email")
-//    Call<Void> verifyEmail(@Query("token") String token);
-
-
 }

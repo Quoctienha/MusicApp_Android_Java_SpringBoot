@@ -18,20 +18,20 @@ import java.util.Optional;
 @RequestMapping("/api/user")
 public class UserController {
 
-    @Autowired
-    private AccountRepository accountRepository;
+    @Autowired private AccountRepository accountRepository;
+    @Autowired private UserRepository    userRepository;
 
-    @Autowired
-    private UserRepository userRepository;
+    /* ----------  GET  /api/user/get-profile  ---------- */
+    @GetMapping("/get-profile")
+    public ResponseEntity<UserProfileResponseDTO> getProfile(
+            @AuthenticationPrincipal UserDetails userDetails) {
 
-    @GetMapping("/profile")
-    public ResponseEntity<UserProfileResponseDTO> getProfile(@AuthenticationPrincipal UserDetails userDetails) {
         String username = userDetails.getUsername();
         Optional<Account> accOpt = accountRepository.findByUsername(username);
         if (accOpt.isEmpty()) return ResponseEntity.notFound().build();
 
         Account account = accOpt.get();
-        User user = account.getUser();
+        User    user    = account.getUser();
 
         UserProfileResponseDTO dto = new UserProfileResponseDTO();
         dto.setUsername(account.getUsername());
@@ -42,12 +42,16 @@ public class UserController {
         return ResponseEntity.ok(dto);
     }
 
-    @PutMapping("/profile")
-    public ResponseEntity<?> updateProfile(@RequestBody EditProfileRequestDTO dto,
-                                           @AuthenticationPrincipal UserDetails userDetails) {
+    /* ----------  PUT  /api/user/edit-profile  ---------- */
+    @PutMapping("/edit-profile")
+    public ResponseEntity<?> updateProfile(
+            @RequestBody EditProfileRequestDTO dto,
+            @AuthenticationPrincipal UserDetails userDetails) {
+
         String username = userDetails.getUsername();
         Optional<Account> accOpt = accountRepository.findByUsername(username);
-        if (accOpt.isEmpty()) return ResponseEntity.status(404).body("Account not found");
+        if (accOpt.isEmpty())
+            return ResponseEntity.status(404).body("Account not found");
 
         Account account = accOpt.get();
         User user = account.getUser();

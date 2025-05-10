@@ -10,6 +10,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,7 +26,7 @@ public class LoginService {
 
 
     @Transactional
-    public LoginResponseDTO login(LoginRequestDTO request) {
+    public LoginResponseDTO applogin(LoginRequestDTO request) {
 
         Authentication authentication;
         try {
@@ -39,6 +40,15 @@ public class LoginService {
         } catch (BadCredentialsException ex) {
             // Nếu sai username hoặc password
             return new LoginResponseDTO(null, null, "Invalid username or password.");
+        }
+
+        //Kiểm tra role: chỉ cho phép ROLE_CUSTOMER
+        boolean isCustomer = authentication.getAuthorities().stream()
+                .map(GrantedAuthority::getAuthority)
+                .anyMatch(role -> role.equals("ROLE_CUSTOMER"));
+
+        if (!isCustomer) {
+            return new LoginResponseDTO(null, null, "Only customers are allowed to login.");
         }
 
         // Set authentication in security context
@@ -62,8 +72,16 @@ public class LoginService {
     public LoginResponseDTO refreshToken(RefreshTokenRequestDTO request) {
         String refreshToken = request.getRefreshToken();
 
-        // Validate refresh token first
+        // Nếu không hợp lệ về mặt JWT (hết hạn, sai chữ ký...)
         if (!jwtService.validateRefreshToken(refreshToken)) {
+            // Cố gắng xoá refresh token khỏi DB nếu có username
+            String username = jwtService.extractUsernameIgnoreExpiration(refreshToken);
+            if (username != null) {
+                accountRepository.findByUsername(username).ifPresent(account -> {
+                    account.setRefreshToken(null);
+                    accountRepository.save(account);
+                });
+            }
             return new LoginResponseDTO(null, null, "Refresh token expired or invalid.");
         }
 
@@ -79,18 +97,24 @@ public class LoginService {
 
         Account account = optionalAccount.get();
 
-        // Kiểm tra refresh token có khớp với token trong cơ sở dữ liệu không
+
+        // Token hợp lệ về mặt JWT nhưng không khớp với DB
         if (!refreshToken.equals(account.getRefreshToken())) {
+            account.setRefreshToken(null); // Xoá refresh token trong DB
+            accountRepository.save(account);
             return new LoginResponseDTO(null, null, "Invalid refresh token. Please login again.");
         }
 
-        // Generate new tokens
+
+        // tạo tokens mới
         String newAccessToken = jwtService.generateAccessToken(username);
         String newRefreshToken = jwtService.generateRefreshToken(username);
 
         // Cập nhật refresh token vào cơ sở dữ liệu
         account.setRefreshToken(newRefreshToken);
         accountRepository.save(account);
+
+        System.out.println("Refresh tokens successfully");
 
         return new LoginResponseDTO(newAccessToken, newRefreshToken, "Token refreshed successfully.");
     }

@@ -1,15 +1,15 @@
 package com.example.musicapp;
 
 import android.content.Intent;
-//import android.content.SharedPreferences;
 import android.os.Bundle;
 
-//import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.musicapp.activity.HomeActivity;
-import com.example.musicapp.activity.LoginActivity;
 import com.example.musicapp.auth.TokenManager;
+import com.example.musicapp.command.CommandInvoker;
+import com.example.musicapp.command.LogoutCommand;
+import com.example.musicapp.command.NavigateToActivityCommand;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -19,22 +19,40 @@ public class MainActivity extends AppCompatActivity {
         //EdgeToEdge.enable(this);
         //setContentView(R.layout.activity_main);
 
-        // Khởi tạo TokenManager để kiểm tra token
-        TokenManager tokenManager = new TokenManager(this);
-
-        // Kiểm tra xem người dùng đã đăng nhập chưa
-        String accessToken = tokenManager.getAccessToken();
-
-        Intent intent;// Đóng MainActivity để không quay lại trang này
-        if (accessToken != null) {
-            // Nếu có token, chuyển đến HomeActivity (người dùng đã đăng nhập)
-            intent = new Intent(MainActivity.this, HomeActivity.class);
-        } else {
-            // Nếu không có token, chuyển đến LoginActivity (người dùng chưa đăng nhập)
-            intent = new Intent(MainActivity.this, LoginActivity.class);
-        }
-        startActivity(intent);
+        decideNavigation();
         finish(); // Đóng MainActivity để không quay lại trang này
+    }
 
+    private void decideNavigation() {
+        TokenManager tokenManager = new TokenManager(this);
+        String accessToken = tokenManager.getAccessToken();
+        String refreshToken = tokenManager.getRefreshToken();
+
+        LogoutCommand forceToLogout = new LogoutCommand(this);
+
+        NavigateToActivityCommand navigateToHome =
+                new NavigateToActivityCommand(this, HomeActivity.class,
+                        Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+
+        CommandInvoker invoker = new CommandInvoker();
+
+        if (accessToken == null || refreshToken == null) {
+            invoker.setCommand(forceToLogout);
+        } else if (tokenManager.isTokenExpired(accessToken)) {
+            // accessToken hết hạn → kiểm tra refreshToken còn hạn không
+            if (tokenManager.isTokenExpired(refreshToken)) {
+                // Cả hai đều hết hạn → logout
+                invoker.setCommand(forceToLogout);
+            } else {
+                // access hết hạn nhưng refresh còn dùng được → ở lại app (sẽ được TokenAuthenticator xử lý tự động)
+                invoker.setCommand(navigateToHome);
+            }
+        } else {
+            // accessToken còn hạn → vào app bình thường
+            invoker.setCommand(navigateToHome);
+        }
+
+
+        invoker.executeCommand();
     }
 }

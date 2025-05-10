@@ -7,6 +7,8 @@ import org.springframework.security.authentication.DisabledException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+// Trong CustomUserDetailsService,
+// Ném ra DisabledException với một message tùy chỉnh khi tài khoản not enable
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
