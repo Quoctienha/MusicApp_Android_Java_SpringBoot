@@ -19,7 +19,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.musicapp.R;
-import com.example.musicapp.adapter.SongAdapter;
+import com.example.musicapp.adapter.PlaylistSongAdapter;
 import com.example.musicapp.api.SongAPI;
 import com.example.musicapp.ultis.RetrofitService;
 import com.example.musicapp.api.PlaylistAPI;
@@ -108,7 +108,7 @@ public class PlaylistDetailFragment extends Fragment {
             public void onResponse(Call<List<SongDTO>> call, Response<List<SongDTO>> response) {
                 if (response.isSuccessful() && response.body() != null) {
                     songList = response.body();
-                    SongAdapter adapter = new SongAdapter(requireContext(), songList, song -> {
+                    PlaylistSongAdapter adapter = new PlaylistSongAdapter(requireContext(), songList, playlistId, song -> {
                         if (isPlaying) {
                             stopMusic();
                         }
