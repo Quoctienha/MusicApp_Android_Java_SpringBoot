@@ -18,7 +18,10 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.musicapp.R;
 import com.example.musicapp.adapter.SongAdapter;
+import com.example.musicapp.adapter.ArtistAdapter;
 import com.example.musicapp.api.SongAPI;
+import com.example.musicapp.api.ArtistAPI;
+import com.example.musicapp.dto.ArtistDTO;
 import com.example.musicapp.dto.SongDTO;
 import com.example.musicapp.ultis.RetrofitService;
 import com.google.android.material.button.MaterialButton;
@@ -71,13 +74,28 @@ public class HomeFragment extends Fragment {
 
         return view;
     }
-
     private void setupTrendingArtists() {
-        List<String> artists = java.util.Arrays.asList("Artist 1", "Artist 2", "Artist 3");
-        trendingArtistsRecycler.setLayoutManager(
-                new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false));
-        trendingArtistsRecycler.setAdapter(new com.example.musicapp.adapter.SimpleTextAdapter(artists));
+        RetrofitService retrofitService = RetrofitService.getInstance(requireContext());
+        ArtistAPI artistAPI = retrofitService.createService(ArtistAPI.class);
+
+        artistAPI.getTopArtists().enqueue(new Callback<List<ArtistDTO>>() {
+            @Override
+            public void onResponse(Call<List<ArtistDTO>> call, Response<List<ArtistDTO>> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    List<ArtistDTO> artistList = response.body();
+                    trendingArtistsRecycler.setLayoutManager(
+                            new LinearLayoutManager(getContext(), LinearLayoutManager.VERTICAL, false)); // Dọc
+                    trendingArtistsRecycler.setAdapter(new ArtistAdapter(artistList));
+                }
+            }
+
+            @Override
+            public void onFailure(Call<List<ArtistDTO>> call, Throwable t) {
+                Toast.makeText(getContext(), "Failed to load artists", Toast.LENGTH_SHORT).show();
+            }
+        });
     }
+
 
     private void setupTrendingMusic() {
         RetrofitService retrofitService = RetrofitService.getInstance(requireContext());
