@@ -16,7 +16,7 @@ public class JwtService {
     private static final long ACCESS_TOKEN_EXPIRATION = 1000 * 60;
 
     // Refresh Token: 7 ngày60 *24 * 7
-    private static final long REFRESH_TOKEN_EXPIRATION = 1000L * 60 * 2;
+    private static final long REFRESH_TOKEN_EXPIRATION = 1000L * 60 * 7;
 
     public String generateAccessToken(String username) {
         return buildToken(username, ACCESS_TOKEN_EXPIRATION, null);

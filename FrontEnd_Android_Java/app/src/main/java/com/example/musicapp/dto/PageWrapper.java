@@ -1,17 +1,8 @@
 package com.example.musicapp.dto;
-
-// Bạn cần có thư viện Gson trong dependencies (thường là mặc định)
-// implementation 'com.google.code.gson:gson:2.9.0' // Hoặc phiên bản mới hơn
 import com.google.gson.annotations.SerializedName;
 
 import java.util.List;
 
-/**
- * Lớp dùng để hứng (wrap) dữ liệu JSON trả về từ API Spring Boot
- * khi sử dụng đối tượng Page để phân trang.
- * Tên các trường cần khớp với JSON hoặc dùng @SerializedName.
- * @param <T> Kiểu của đối tượng trong danh sách 'content' (ví dụ: SongDTO).
- */
 public class PageWrapper<T> {
 
     @SerializedName("content")

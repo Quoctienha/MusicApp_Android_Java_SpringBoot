@@ -18,7 +18,8 @@ public interface SongRepository extends JpaRepository<Song, Long> {
     Page<Song> findByArtistFullNameContainingIgnoreCase(@Param("artistName") String artistName, Pageable pageable);
     @Query("SELECT s FROM Song s JOIN s.artist u WHERE " +
             "LOWER(s.title) LIKE LOWER(concat('%', :keyword, '%')) OR " +
-            "LOWER(u.fullName) LIKE LOWER(concat('%', :keyword, '%'))")
+            "LOWER(u.fullName) LIKE LOWER(concat('%', :keyword, '%')) OR " +
+            "LOWER(u.stageName) LIKE LOWER(concat('%', :keyword, '%'))")
     Page<Song> findByKeywordIgnoreCase(@Param("keyword") String keyword, Pageable pageable);
 
 }

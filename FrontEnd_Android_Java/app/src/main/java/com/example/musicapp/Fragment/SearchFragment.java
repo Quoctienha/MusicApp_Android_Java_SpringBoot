@@ -1,10 +1,12 @@
 package com.example.musicapp.Fragment;
 
 import android.content.Context;
+import android.content.Intent; // <<--- THÊM IMPORT
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Looper;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -19,6 +21,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.widget.SearchView;
 import androidx.fragment.app.Fragment;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager; // <<--- THÊM IMPORT
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -31,6 +34,7 @@ import com.example.musicapp.ultis.RetrofitService;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.slider.Slider;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -40,27 +44,21 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-
 public class SearchFragment extends Fragment implements SongAdapter.OnSongClickListener {
 
+    private static final String TAG = "SearchFragment_Player";
+    private static final String ARG_QUERY = "initial_query";
+    public static final String ACTION_UPDATE_TRENDING = "com.example.musicapp.UPDATE_TRENDING_ACTION"; // <<--- THÊM ACTION NAME
 
-    private static final String TAG = "SearchFragment";
-    private static final String ARG_QUERY = "initial_query"; // Key for initial query argument
-
-
-    // --- ĐỊNH NGHĨA INTERFACE ---
-    public interface OnSearchResultSelectedListener {
-        void onSearchResultSelected(SongDTO selectedSong, List<SongDTO> searchResultList);
-    }
-    // --- KẾT THÚC INTERFACE ---
-
+    // Interface này có thể không cần thiết nữa nếu SearchFragment tự xử lý mọi thứ
+    // Hoặc có thể giữ lại cho các mục đích khác nếu có
 
     // Views - Tìm kiếm
     private SearchView searchView;
     private RecyclerView recyclerViewSearchResults;
     private ProgressBar progressBarSearch;
     private TextView textViewNoResults;
-    private ImageView searchFragmentBackIcon; // THÊM BIẾN CHO ICON BACK
+    private ImageView searchFragmentBackIcon;
 
     // Views - Phát nhạc
     private MediaPlayer mediaPlayer;
@@ -69,14 +67,13 @@ public class SearchFragment extends Fragment implements SongAdapter.OnSongClickL
     private TextView songTitleTextView;
     private TextView songArtistTextView;
     private TextView startTimeTextView, endTimeTextView;
-    private Handler handler = new Handler();
+    private final Handler playerHandler = new Handler(Looper.getMainLooper());
 
 
     // Logic components
     private SongAdapter songAdapter;
     private SongAPI songAPI;
     private LinearLayoutManager layoutManager;
-    private OnSearchResultSelectedListener listener;
 
     // State variables - Tìm kiếm
     private String currentQuery = "";
@@ -88,19 +85,11 @@ public class SearchFragment extends Fragment implements SongAdapter.OnSongClickL
     private static final int VISIBLE_THRESHOLD = 5;
 
     // State variables - Phát nhạc
-    private List<SongDTO> currentPlaylist;
-    private int currentSongIndex = -1;
+    private List<SongDTO> currentPlaylistForPlayer;
+    private int currentSongIndexInPlayer = -1;
     private boolean isPlaying = false;
-
     private boolean isPreparingMediaPlayer = false;
-    private String currentPreparingUrl = null;
 
-    /**
-     * Static factory method to create a new instance of SearchFragment
-     * with an initial search query.
-     * @param query The initial search query.
-     * @return A new instance of SearchFragment.
-     */
     public static SearchFragment newInstance(String query) {
         SearchFragment fragment = new SearchFragment();
         Bundle args = new Bundle();
@@ -109,57 +98,31 @@ public class SearchFragment extends Fragment implements SongAdapter.OnSongClickL
         return fragment;
     }
 
-    // --- onAttach VÀ onDetach ---
-    @Override
-    public void onAttach(@NonNull Context context) {
-        super.onAttach(context);
-        if (context instanceof OnSearchResultSelectedListener) {
-            listener = (OnSearchResultSelectedListener) context;
-            Log.d(TAG, "OnSearchResultSelectedListener attached.");
-        } else {
-            throw new RuntimeException(context.toString()
-                    + " must implement OnSearchResultSelectedListener");
-        }
-    }
-
-
-    @Override
-    public void onDetach() {
-        super.onDetach();
-        listener = null;
-        Log.d(TAG, "OnSearchResultSelectedListener detached.");
-    }
-    // --- KẾT THÚC onAttach/onDetach ---
-
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        // Đảm bảo requireContext() không null khi Fragment chưa được attach hoàn toàn
         if (isAdded() && getContext() != null) {
             songAPI = RetrofitService.getInstance(requireContext()).createService(SongAPI.class);
-        } else {
-            // Hoãn việc khởi tạo songAPI hoặc xử lý lỗi nếu cần
-            Log.e(TAG, "onCreate: Context is null, songAPI not initialized yet.");
         }
 
         if (getArguments() != null) {
             String initialQuery = getArguments().getString(ARG_QUERY);
             if (initialQuery != null && !initialQuery.trim().isEmpty()) {
                 currentQuery = initialQuery.trim();
-                Log.d(TAG, "onCreate: Initial query set from arguments: " + currentQuery);
             }
         }
     }
+
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        // Khởi tạo songAPI ở đây nếu chưa được khởi tạo trong onCreate do context null
         if (songAPI == null && getContext() != null) {
             songAPI = RetrofitService.getInstance(requireContext()).createService(SongAPI.class);
         }
         return inflater.inflate(R.layout.fragment_search, container, false);
     }
+
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
@@ -168,6 +131,7 @@ public class SearchFragment extends Fragment implements SongAdapter.OnSongClickL
         recyclerViewSearchResults = view.findViewById(R.id.recyclerViewSearchResults);
         progressBarSearch = view.findViewById(R.id.progressBarSearch);
         textViewNoResults = view.findViewById(R.id.textViewNoResults);
+        searchFragmentBackIcon = view.findViewById(R.id.search_fragment_back_icon);
 
         playButton = view.findViewById(R.id.play_button);
         nextBtn = view.findViewById(R.id.next_button);
@@ -178,36 +142,25 @@ public class SearchFragment extends Fragment implements SongAdapter.OnSongClickL
         songTitleTextView = view.findViewById(R.id.songTitleTextView);
         songArtistTextView = view.findViewById(R.id.songArtistTextView);
 
-        // TÌM ImageView CỦA NÚT BACK
-        searchFragmentBackIcon = view.findViewById(R.id.search_fragment_back_icon); // ID từ file XML layout
-
         setupRecyclerView();
         setupSearchView();
         setupPlayerControls();
 
-        // GẮN OnClickListener CHO NÚT BACK
         if (searchFragmentBackIcon != null) {
             searchFragmentBackIcon.setOnClickListener(v -> {
-                // Ẩn bàn phím (nếu đang mở) trước khi quay lại
                 hideKeyboard();
-
-                // Gọi hành động onBackPressed của Activity chứa Fragment này
                 if (getActivity() != null) {
-                    Log.d(TAG, "Nút Back trên thanh tìm kiếm được nhấn, gọi onBackPressed của Activity.");
                     getActivity().onBackPressed();
                 }
             });
         }
-        // Handle initial query logic
+
         if (currentQuery != null && !currentQuery.isEmpty()) {
             if (searchView != null) {
-                // Post to ensure SearchView is fully initialized
-                searchView.post(() -> searchView.setQuery(currentQuery, false)); // Set query without submitting
+                searchView.post(() -> searchView.setQuery(currentQuery, false));
             }
-            Log.d(TAG, "onViewCreated: Performing search with initial query: " + currentQuery);
-            resetSearchStateAndSearch(); // Perform search with the initial query
+            resetSearchStateAndSearch();
         } else {
-            // No initial query, so focus the search bar for user input
             showKeyboardAndFocus();
         }
     }
@@ -216,13 +169,12 @@ public class SearchFragment extends Fragment implements SongAdapter.OnSongClickL
     public void onDestroyView() {
         super.onDestroyView();
         releasePlayer();
-        if (handler != null) {
-            handler.removeCallbacksAndMessages(null);
-        }
+        playerHandler.removeCallbacksAndMessages(null);
     }
 
+    // ... (setupRecyclerView, setupSearchView, setupPlayerControls, resetSearchState, resetSearchStateAndSearch, performNewSearch, performSearch, showKeyboardAndFocus, hideKeyboard giữ nguyên)
     private void setupRecyclerView() {
-        if (getContext() == null) return;
+        if (getContext() == null || !isAdded()) return;
         songAdapter = new SongAdapter(getContext(), new ArrayList<>(), this);
         layoutManager = new LinearLayoutManager(getContext());
         recyclerViewSearchResults.setLayoutManager(layoutManager);
@@ -239,8 +191,8 @@ public class SearchFragment extends Fragment implements SongAdapter.OnSongClickL
                     if (!isLoading && !isLastPage) {
                         if ((visibleItemCount + firstVisibleItemPosition) >= totalItemCount - VISIBLE_THRESHOLD
                                 && firstVisibleItemPosition >= 0
-                                && totalItemCount > 0 // Ensure totalItemCount is positive
-                                && currentPage < totalPages - 1) // Ensure not exceeding total pages
+                                && totalItemCount > 0
+                                && currentPage < totalPages - 1)
                         {
                             Log.i(TAG, "Scroll near end detected. Requesting page: " + (currentPage + 1));
                             performSearch(currentQuery, currentPage + 1);
@@ -254,18 +206,18 @@ public class SearchFragment extends Fragment implements SongAdapter.OnSongClickL
     private void setupSearchView() {
         if (searchView == null) { Log.e(TAG, "setupSearchView: searchView is null!"); return; }
         searchView.setQueryHint("Tìm bài hát, nghệ sĩ...");
-        // searchView.setIconified(false); // Đã được xử lý trong logic showKeyboardAndFocus hoặc khi có initialQuery
 
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
-            public boolean onQueryTextSubmit(String query) { // Search initiated from Fragment's own SearchView
+            public boolean onQueryTextSubmit(String query) {
                 if (query != null && !query.trim().isEmpty()) {
-                    String newQuery = query.trim();
-                    Log.d(TAG, "Search submitted from fragment's SearchView: " + newQuery);
-                    currentQuery = newQuery; // Update currentQuery
-                    resetSearchStateAndSearch();
+                    String newQuery = query.trim().toLowerCase();
+                    if (!currentQuery.equals(newQuery) || songAdapter.getItemCount() == 0 ) {
+                        currentQuery = newQuery;
+                        resetSearchStateAndSearch();
+                    }
                 } else {
-                    resetSearchState(); // Clear results if query is empty
+                    resetSearchState();
                 }
                 hideKeyboard();
                 if (searchView != null) searchView.clearFocus();
@@ -274,35 +226,37 @@ public class SearchFragment extends Fragment implements SongAdapter.OnSongClickL
             @Override
             public boolean onQueryTextChange(String newText) {
                 if (newText != null && newText.trim().isEmpty() && (songAdapter != null && songAdapter.getItemCount() > 0)) {
-                    Log.d(TAG, "Search text cleared in fragment's SearchView, resetting state.");
                     currentQuery = "";
                     resetSearchState();
                 }
-                return false;
+                return true;
             }
         });
     }
 
     private void setupPlayerControls() {
+        if (playButton == null) {
+            Log.e(TAG, "Player control views are not initialized. Check your layout file.");
+            return;
+        }
         playButton.setOnClickListener(v -> {
-            if (currentSongIndex == -1 || currentPlaylist == null || currentPlaylist.isEmpty()) {
-                if(getContext() != null) Toast.makeText(getContext(), "Vui lòng chọn bài hát!", Toast.LENGTH_SHORT).show();
+            if (currentPlaylistForPlayer == null || currentPlaylistForPlayer.isEmpty() || currentSongIndexInPlayer == -1) {
+                if (getContext() != null) Toast.makeText(getContext(), "Vui lòng chọn bài hát!", Toast.LENGTH_SHORT).show();
                 return;
             }
-
             if (isPreparingMediaPlayer) {
-                Log.d(TAG, "MediaPlayer đang được chuẩn bị, đợi xử lý hoàn tất");
+                if (getContext() != null) Toast.makeText(getContext(), "Player is preparing, please wait.", Toast.LENGTH_SHORT).show();
                 return;
             }
 
             if (mediaPlayer == null) {
-                String fileUrl = currentPlaylist.get(currentSongIndex).getFileUrl();
-                startMusic(fileUrl);
+                SongDTO songToPlay = currentPlaylistForPlayer.get(currentSongIndexInPlayer);
+                updatePlayerSongInfo(songToPlay);
+                startMusic(songToPlay.getFileUrl());
             } else if (mediaPlayer.isPlaying()) {
                 mediaPlayer.pause();
                 isPlaying = false;
                 playButton.setIconResource(R.drawable.ic_play);
-                Log.d(TAG, "Paused");
             } else {
                 mediaPlayer.start();
                 isPlaying = true;
@@ -312,37 +266,37 @@ public class SearchFragment extends Fragment implements SongAdapter.OnSongClickL
         });
 
         nextBtn.setOnClickListener(v -> {
-            if (currentPlaylist == null || currentPlaylist.isEmpty()) return;
-            if (isPreparingMediaPlayer) {
-                Log.d(TAG, "Đang chuẩn bị MediaPlayer, không thể chuyển bài");
-                return;
-            }
-            if (mediaPlayer != null) {
+            if (currentPlaylistForPlayer == null || currentPlaylistForPlayer.isEmpty()) return;
+            if (isPreparingMediaPlayer) return;
+            if (isPlaying) {
                 stopMusic();
             }
-            currentSongIndex = (currentSongIndex + 1) % currentPlaylist.size();
-            updateSongInfo(currentPlaylist.get(currentSongIndex));
-            startMusic(currentPlaylist.get(currentSongIndex).getFileUrl());
+            currentSongIndexInPlayer = (currentSongIndexInPlayer + 1) % currentPlaylistForPlayer.size();
+            SongDTO nextSong = currentPlaylistForPlayer.get(currentSongIndexInPlayer);
+            updatePlayerSongInfo(nextSong);
+            startMusic(nextSong.getFileUrl());
         });
 
         previousBtn.setOnClickListener(v -> {
-            if (currentPlaylist == null || currentPlaylist.isEmpty()) return;
-            if (isPreparingMediaPlayer) {
-                Log.d(TAG, "Đang chuẩn bị MediaPlayer, không thể chuyển bài");
-                return;
-            }
-            if (mediaPlayer != null) {
+            if (currentPlaylistForPlayer == null || currentPlaylistForPlayer.isEmpty()) return;
+            if (isPreparingMediaPlayer) return;
+            if (isPlaying) {
                 stopMusic();
             }
-            currentSongIndex = (currentSongIndex - 1 + currentPlaylist.size()) % currentPlaylist.size();
-            updateSongInfo(currentPlaylist.get(currentSongIndex));
-            startMusic(currentPlaylist.get(currentSongIndex).getFileUrl());
+            currentSongIndexInPlayer = (currentSongIndexInPlayer - 1 + currentPlaylistForPlayer.size()) % currentPlaylistForPlayer.size();
+            SongDTO prevSong = currentPlaylistForPlayer.get(currentSongIndexInPlayer);
+            updatePlayerSongInfo(prevSong);
+            startMusic(prevSong.getFileUrl());
         });
 
         seekBar.addOnChangeListener((slider, value, fromUser) -> {
             if (fromUser && mediaPlayer != null && mediaPlayer.getDuration() > 0) {
-                int seekPosition = (int) (mediaPlayer.getDuration() * (value / 100f));
-                mediaPlayer.seekTo(seekPosition);
+                try {
+                    int seekPosition = (int) (mediaPlayer.getDuration() * (value / 100f));
+                    mediaPlayer.seekTo(seekPosition);
+                } catch (IllegalStateException e) {
+                    Log.e(TAG, "Error seeking MediaPlayer: " + e.getMessage());
+                }
             }
         });
     }
@@ -365,7 +319,6 @@ public class SearchFragment extends Fragment implements SongAdapter.OnSongClickL
         isLastPage = false;
         if (songAdapter != null) songAdapter.clear();
         if (textViewNoResults != null) textViewNoResults.setVisibility(View.GONE);
-        // performSearch sẽ hiển thị progressBar nếu page == 0
         performSearch(currentQuery, 0);
     }
 
@@ -374,8 +327,8 @@ public class SearchFragment extends Fragment implements SongAdapter.OnSongClickL
             Log.w(TAG, "performNewSearch called with null query.");
             return;
         }
-        Log.i(TAG, "performNewSearch called by Activity with query: " + newQuery);
-        currentQuery = newQuery.trim();
+        Log.i(TAG, "performNewSearch called with query: " + newQuery);
+        currentQuery = newQuery.trim().toLowerCase();
 
         if (searchView != null) {
             searchView.setQuery(currentQuery, false);
@@ -388,33 +341,25 @@ public class SearchFragment extends Fragment implements SongAdapter.OnSongClickL
         }
     }
 
-
     private void performSearch(final String query, final int page) {
         final String queryToSearch = (query != null && !query.isEmpty()) ? query.trim() : currentQuery.trim();
 
         if (isLoading) {
-            Log.d(TAG, "Search already in progress, ignoring request for query '" + queryToSearch + "' page " + page);
             return;
         }
-        if (queryToSearch == null || queryToSearch.isEmpty()) {
-            Log.d(TAG, "Empty query, ignoring search request. Clearing results.");
+        if (queryToSearch.isEmpty()) {
             resetSearchState();
             return;
         }
-        // Kiểm tra songAPI đã được khởi tạo chưa
         if (songAPI == null) {
             if (getContext() != null) {
                 songAPI = RetrofitService.getInstance(requireContext()).createService(SongAPI.class);
             } else {
-                Log.e(TAG, "performSearch: songAPI is null and getContext() is null. Cannot perform search.");
-                if (isAdded()) Toast.makeText(getActivity(), "Lỗi kết nối, vui lòng thử lại.", Toast.LENGTH_SHORT).show();
-                isLoading = false; // Reset loading flag
+                isLoading = false;
                 return;
             }
         }
 
-
-        Log.i(TAG, "Performing search - Query: '" + queryToSearch + "', Requesting Page: " + page);
         isLoading = true;
         if (page == 0 && progressBarSearch != null) progressBarSearch.setVisibility(View.VISIBLE);
         if (textViewNoResults != null) textViewNoResults.setVisibility(View.GONE);
@@ -434,10 +379,6 @@ public class SearchFragment extends Fragment implements SongAdapter.OnSongClickL
                     totalPages = pageResult.getTotalPages();
                     isLastPage = pageResult.isLast();
 
-                    Log.i(TAG, "Search response SUCCESS - Query: '" + queryToSearch + "', CurrentPage: " + currentPage +
-                            ", TotalPages: " + totalPages + ", IsLast: " + isLastPage +
-                            ", SongsOnPage: " + (songs != null ? songs.size() : 0));
-
                     if (page == 0) {
                         if (songs == null || songs.isEmpty()) {
                             if (textViewNoResults != null) textViewNoResults.setVisibility(View.VISIBLE);
@@ -452,13 +393,8 @@ public class SearchFragment extends Fragment implements SongAdapter.OnSongClickL
                         }
                     }
                 } else {
-                    Log.e(TAG, "Search API response ERROR - Query: '" + queryToSearch + "', Code: " + response.code() + ", Message: " + response.message());
-                    if (page == 0) {
-                        if (textViewNoResults != null) textViewNoResults.setVisibility(View.VISIBLE);
-                        if (songAdapter != null) songAdapter.clear();
-                    }
-                    isLastPage = true; // Prevent further loading on error for this query
-                    if(getContext() != null) Toast.makeText(getContext(), "Lỗi khi tải dữ liệu tìm kiếm.", Toast.LENGTH_SHORT).show();
+                    if (page == 0 && songAdapter != null) songAdapter.clear();
+                    if (getContext() != null) Toast.makeText(getContext(), "Lỗi khi tải dữ liệu. Code: " + response.code(), Toast.LENGTH_SHORT).show();
                 }
             }
 
@@ -467,22 +403,14 @@ public class SearchFragment extends Fragment implements SongAdapter.OnSongClickL
                 if (!isAdded() || getContext() == null) return;
                 isLoading = false;
                 if (progressBarSearch != null) progressBarSearch.setVisibility(View.GONE);
-                Log.e(TAG, "Search API call FAILURE - Query: '" + queryToSearch + "': " + t.getMessage(), t);
-                if (page == 0) {
-                    if (textViewNoResults != null) textViewNoResults.setVisibility(View.VISIBLE);
-                    if (songAdapter != null) songAdapter.clear();
-                }
-                isLastPage = true; // Prevent further loading on failure for this query
-                if(getContext() != null) Toast.makeText(getContext(), "Lỗi mạng: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+                if (page == 0 && songAdapter != null) songAdapter.clear();
+                if (getContext() != null) Toast.makeText(getContext(), "Lỗi mạng: " + t.getMessage(), Toast.LENGTH_SHORT).show();
             }
         });
     }
 
     private void showKeyboardAndFocus() {
-        if (searchView == null || !isAdded() || getActivity() == null || !searchView.isAttachedToWindow()) {
-            Log.w(TAG, "showKeyboardAndFocus: Conditions not met (searchView null, not added/attached, or activity null).");
-            return;
-        }
+        if (searchView == null || !isAdded() || getActivity() == null || !searchView.isAttachedToWindow()) return;
         searchView.post(() -> {
             if (!isAdded() || getActivity() == null || !searchView.isFocusable()) return;
             searchView.setIconified(false);
@@ -490,11 +418,7 @@ public class SearchFragment extends Fragment implements SongAdapter.OnSongClickL
                 InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
                 if (imm != null) {
                     imm.showSoftInput(searchView.findFocus(), InputMethodManager.SHOW_IMPLICIT);
-                } else {
-                    Log.w(TAG, "InputMethodManager is null");
                 }
-            } else {
-                Log.w(TAG, "searchView.requestFocus() failed");
             }
         });
     }
@@ -508,212 +432,210 @@ public class SearchFragment extends Fragment implements SongAdapter.OnSongClickL
         }
         if (view != null && imm != null && view.getWindowToken() != null) {
             imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
-        } else {
-            Log.w(TAG, "hideKeyboard: Conditions not met (imm null, view null, or window token null).");
         }
     }
 
-    // --- XỬ LÝ CLICK VÀO BÀI HÁT ---
+
     @Override
     public void onSongClick(SongDTO song) {
-        if(song == null) {
-            Log.e(TAG, "onSongClick: song is null!");
+        if (!isAdded() || getContext() == null) return;
+        if (song == null) {
+            Toast.makeText(getContext(), "Lỗi: Bài hát không hợp lệ.", Toast.LENGTH_SHORT).show();
             return;
         }
-        Log.i(TAG, "Song clicked: ID=" + song.getId() + ", Title=" + song.getTitle());
         hideKeyboard();
+        if (songAdapter == null) return;
 
-        if (songAdapter == null) {
-            Log.e(TAG, "onSongClick: songAdapter is null!");
-            return;
+        if (isPreparingMediaPlayer) {
+            releasePlayer();
+        } else if (isPlaying) {
+            SongDTO currentlyPlayingSong = (currentSongIndexInPlayer != -1 && currentPlaylistForPlayer != null && currentSongIndexInPlayer < currentPlaylistForPlayer.size())
+                    ? currentPlaylistForPlayer.get(currentSongIndexInPlayer) : null;
+            if (currentlyPlayingSong != null && !Objects.equals(currentlyPlayingSong.getId(), song.getId())) {
+                stopMusic();
+            } else if (currentlyPlayingSong != null && Objects.equals(currentlyPlayingSong.getId(), song.getId())) {
+                if (mediaPlayer != null && mediaPlayer.isPlaying()) {
+                    mediaPlayer.pause();
+                    isPlaying = false;
+                    if (playButton != null) playButton.setIconResource(R.drawable.ic_play);
+                } else if (mediaPlayer != null) {
+                    mediaPlayer.start();
+                    isPlaying = true;
+                    if (playButton != null) playButton.setIconResource(R.drawable.ic_pause);
+                }
+                return;
+            }
         }
 
-        currentPlaylist = songAdapter.getCurrentList();
-        currentSongIndex = currentPlaylist.indexOf(song);
+        currentPlaylistForPlayer = new ArrayList<>(songAdapter.getCurrentList());
+        currentSongIndexInPlayer = currentPlaylistForPlayer.indexOf(song);
 
-        if (currentSongIndex == -1) {
-            Log.e(TAG, "onSongClick: Clicked song not found in current adapter list.");
-            if(getContext() != null) Toast.makeText(getContext(), "Lỗi chọn bài hát.", Toast.LENGTH_SHORT).show();
-            return;
+        if (currentSongIndexInPlayer == -1) {
+            currentPlaylistForPlayer.add(0, song);
+            currentSongIndexInPlayer = 0;
         }
 
-        if (isPlaying || isPreparingMediaPlayer) {
-            stopMusic();
-        }
-        updateSongInfo(song);
+        updatePlayerSongInfo(song);
         startMusic(song.getFileUrl());
-
-        if (listener != null) {
-            Log.d(TAG, "Notifying listener: onSearchResultSelected for " + song.getTitle());
-            listener.onSearchResultSelected(song, currentPlaylist);
-        }
     }
-    // --- KẾT THÚC XỬ LÝ CLICK VÀO BÀI HÁT ---
 
-    // --- LOGIC PHÁT NHẠC ---
-    private void updateSongInfo(SongDTO song) {
-        if (songTitleTextView != null) songTitleTextView.setText(song.getTitle());
-        if (songArtistTextView != null) songArtistTextView.setText(song.getArtist());
+    private void updatePlayerSongInfo(SongDTO song) {
+        if (!isAdded()) return;
+        if (songTitleTextView == null || songArtistTextView == null) return; // Thêm kiểm tra view
+        if (song == null) {
+            songTitleTextView.setText("N/A");
+            songArtistTextView.setText("N/A");
+            return;
+        }
+        songTitleTextView.setText(song.getTitle());
+        songArtistTextView.setText(song.getArtist() != null ? song.getArtist() : "Unknown Artist");
     }
 
     private void startMusic(String url) {
-        if (getContext() == null || !isAdded()) {
-            Log.e(TAG, "startMusic: Context is null or fragment not added.");
-            return;
-        }
+        if (getContext() == null || !isAdded()) return;
         if (url == null || url.isEmpty()) {
-            Log.e(TAG, "startMusic: URL is null or empty.");
-            if(getContext() != null) Toast.makeText(getContext(), "Không tìm thấy link nhạc.", Toast.LENGTH_SHORT).show();
+            Toast.makeText(getContext(), "Invalid song URL.", Toast.LENGTH_SHORT).show();
             return;
         }
-        if (isPreparingMediaPlayer && Objects.equals(currentPreparingUrl, url)) {
-            Log.d(TAG, "Đã đang chuẩn bị phát URL này: " + url);
-            return;
-        }
+
         releasePlayer();
         isPreparingMediaPlayer = true;
-        currentPreparingUrl = url;
+        setPlayerControlsEnabled(false);
 
-        if (playButton != null) playButton.setEnabled(false);
-        if (nextBtn != null) nextBtn.setEnabled(false);
-        if (previousBtn != null) previousBtn.setEnabled(false);
-        Log.d(TAG, "Bắt đầu chuẩn bị MediaPlayer cho: " + url);
         mediaPlayer = new MediaPlayer();
         mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
-
         try {
             mediaPlayer.setDataSource(url);
             mediaPlayer.setOnPreparedListener(mp -> {
-                if (!isAdded() || getContext() == null) {
-                    isPreparingMediaPlayer = false;
-                    currentPreparingUrl = null;
+                if (!isAdded()) {
                     releasePlayer();
                     return;
                 }
                 isPreparingMediaPlayer = false;
-                currentPreparingUrl = null;
-                if (playButton != null) playButton.setEnabled(true);
-                if (nextBtn != null) nextBtn.setEnabled(true);
-                if (previousBtn != null) previousBtn.setEnabled(true);
+                setPlayerControlsEnabled(true);
                 mp.start();
                 isPlaying = true;
                 if (playButton != null) playButton.setIconResource(R.drawable.ic_pause);
                 if (seekBar != null) {
                     seekBar.setValue(0);
-                    seekBar.setValueFrom(0);
                     seekBar.setValueTo(100);
                 }
-                int totalDuration = mp.getDuration();
-                if (endTimeTextView != null) endTimeTextView.setText(formatTime(totalDuration));
-                if (startTimeTextView != null) startTimeTextView.setText(formatTime(0));
+                if(endTimeTextView != null) endTimeTextView.setText(formatTime(mp.getDuration()));
+                if(startTimeTextView != null) startTimeTextView.setText(formatTime(0));
                 startUpdatingSeekBar();
-                Log.d(TAG, "MediaPlayer đã sẵn sàng và đang phát: " + url);
 
-                if (currentPlaylist != null && currentSongIndex >= 0 && currentSongIndex < currentPlaylist.size() && getContext() != null) {
-                    long songId = currentPlaylist.get(currentSongIndex).getId();
-                    // Đảm bảo songAPI được khởi tạo
-                    if (songAPI == null) {
-                        if (getContext() != null) {
-                            songAPI = RetrofitService.getInstance(requireContext()).createService(SongAPI.class);
-                        } else {
-                            Log.e(TAG, "Cannot increment view: songAPI is null and getContext() is null.");
-                            return; // Không thể gọi API nếu songAPI null
-                        }
+                if (currentPlaylistForPlayer != null && currentSongIndexInPlayer >= 0 && currentSongIndexInPlayer < currentPlaylistForPlayer.size()) {
+                    long songId = currentPlaylistForPlayer.get(currentSongIndexInPlayer).getId();
+                    if (songAPI == null && getContext() != null) {
+                        songAPI = RetrofitService.getInstance(requireContext()).createService(SongAPI.class);
                     }
-                    songAPI.incrementView(songId).enqueue(new Callback<Void>() {
-                        @Override
-                        public void onResponse(Call<Void> call, Response<Void> response) {
-                            if (response.isSuccessful()) {
-                                Log.d(TAG, "View count updated for song id: " + songId);
-                            } else {
-                                Log.w(TAG, "Failed to update view for song id: " + songId + ". Code: " + response.code());
+                    if (songAPI != null) { // Kiểm tra songAPI trước khi gọi
+                        songAPI.incrementView(songId).enqueue(new Callback<Void>() {
+                            @Override
+                            public void onResponse(@NonNull Call<Void> call, @NonNull Response<Void> response) {
+                                if (!isAdded() || getContext() == null) return;
+                                if (response.isSuccessful()) {
+                                    Log.d(TAG, "View count updated for song id: " + songId + " (from SearchFragment player)");
+                                    // << --- GỬI BROADCAST ĐỂ HOMEFRAGMENT CẬP NHẬT TRENDING --- >>
+                                    Intent intent = new Intent(ACTION_UPDATE_TRENDING);
+                                    LocalBroadcastManager.getInstance(requireContext()).sendBroadcast(intent);
+                                    Log.d(TAG, "Sent broadcast to update trending.");
+                                } else {
+                                    Log.w(TAG, "Failed to update view in SearchFragment. Code: " + response.code());
+                                }
                             }
-                        }
-                        @Override
-                        public void onFailure(Call<Void> call, Throwable t) {
-                            Log.e(TAG, "Error updating view for song id: " + songId + ": " + t.getMessage());
-                        }
-                    });
+                            @Override
+                            public void onFailure(@NonNull Call<Void> call, @NonNull Throwable t) {
+                                if (!isAdded()) return;
+                                Log.e(TAG, "Error updating view in SearchFragment: " + t.getMessage());
+                            }
+                        });
+                    }
                 }
             });
             mediaPlayer.setOnErrorListener((mp, what, extra) -> {
-                Log.e(TAG, "MediaPlayer error: what=" + what + ", extra=" + extra + " for URL: " + (currentPreparingUrl != null ? currentPreparingUrl : "unknown"));
+                if (!isAdded() || getContext() == null) return true;
                 isPreparingMediaPlayer = false;
-                currentPreparingUrl = null;
-                if (playButton != null) playButton.setEnabled(true);
-                if (nextBtn != null) nextBtn.setEnabled(true);
-                if (previousBtn != null) previousBtn.setEnabled(true);
-                if (getContext() != null) Toast.makeText(getContext(), "Không thể phát bài hát này.", Toast.LENGTH_SHORT).show();
+                setPlayerControlsEnabled(true);
                 releasePlayer();
+                Toast.makeText(getContext(), "Không thể phát bài hát này.", Toast.LENGTH_SHORT).show();
+                if (playButton != null) playButton.setIconResource(R.drawable.ic_play);
+                updatePlayerSongInfo(null);
                 return true;
             });
             mediaPlayer.setOnCompletionListener(mp -> {
                 if (!isAdded()) return;
                 isPlaying = false;
                 if (playButton != null) playButton.setIconResource(R.drawable.ic_play);
-                if (handler != null) handler.removeCallbacksAndMessages(null);
-                if (seekBar != null) seekBar.setValue(0);
-                if (startTimeTextView != null) startTimeTextView.setText(formatTime(0));
-                if (currentPlaylist != null && !currentPlaylist.isEmpty()) {
-                    Log.d(TAG, "Song completed. Playing next.");
-                    currentSongIndex = (currentSongIndex + 1) % currentPlaylist.size();
-                    updateSongInfo(currentPlaylist.get(currentSongIndex));
-                    startMusic(currentPlaylist.get(currentSongIndex).getFileUrl());
+                if (playerHandler != null) playerHandler.removeCallbacksAndMessages(null); // Dừng handler khi hoàn thành
+                if(seekBar != null) seekBar.setValue(0);
+                if(startTimeTextView != null) startTimeTextView.setText(formatTime(0));
+
+                if (currentPlaylistForPlayer != null && !currentPlaylistForPlayer.isEmpty()) {
+                    currentSongIndexInPlayer = (currentSongIndexInPlayer + 1) % currentPlaylistForPlayer.size();
+                    SongDTO nextSong = currentPlaylistForPlayer.get(currentSongIndexInPlayer);
+                    updatePlayerSongInfo(nextSong);
+                    startMusic(nextSong.getFileUrl());
                 } else {
-                    Log.d(TAG, "Song completed. No playlist or playlist empty. Releasing player.");
                     releasePlayer();
                 }
             });
             mediaPlayer.prepareAsync();
-        } catch (Exception e) {
-            Log.e(TAG, "Exception during MediaPlayer setup for URL " + (url != null ? url : "null") + ": " + e.getMessage(), e);
+        } catch (IOException | IllegalStateException e) { // Gộp các Exception có thể xảy ra
+            Log.e(TAG, "Exception preparing MediaPlayer: " + e.getMessage());
             isPreparingMediaPlayer = false;
-            currentPreparingUrl = null;
-            if (playButton != null) playButton.setEnabled(true);
-            if (nextBtn != null) nextBtn.setEnabled(true);
-            if (previousBtn != null) previousBtn.setEnabled(true);
-            if (getContext() != null) Toast.makeText(getContext(), "Lỗi khi chuẩn bị phát nhạc.", Toast.LENGTH_SHORT).show();
+            setPlayerControlsEnabled(true);
             releasePlayer();
+            if (getContext() != null) Toast.makeText(getContext(), "Lỗi khi chuẩn bị phát nhạc.", Toast.LENGTH_SHORT).show();
         }
     }
 
+    private void setPlayerControlsEnabled(boolean enabled) {
+        if (!isAdded()) return; // Thêm kiểm tra
+        if (playButton != null) playButton.setEnabled(enabled);
+        if (nextBtn != null) nextBtn.setEnabled(enabled);
+        if (previousBtn != null) previousBtn.setEnabled(enabled);
+        if (seekBar != null) seekBar.setEnabled(enabled);
+    }
+
     private void startUpdatingSeekBar() {
-        if (handler == null || mediaPlayer == null || !isPlaying) { // Đã có isPlaying check
+        if (playerHandler == null || mediaPlayer == null || !isPlaying || !isAdded()) {
             return;
         }
-        handler.postDelayed(new Runnable() {
+        playerHandler.post(new Runnable() {
             @Override
             public void run() {
-                if (mediaPlayer != null && isPlaying && isAdded()) {
+                if (mediaPlayer != null && isPlaying && isAdded() && getView() != null) {
                     try {
                         int currentPosition = mediaPlayer.getCurrentPosition();
                         int duration = mediaPlayer.getDuration();
+
                         if (duration > 0) {
                             float progress = (currentPosition * 100f) / duration;
                             if (seekBar != null) seekBar.setValue(Math.min(progress, 100f));
                             if (startTimeTextView != null) startTimeTextView.setText(formatTime(currentPosition));
                         }
-                        if(isPlaying) handler.postDelayed(this, 500);
+                        if (isPlaying && isAdded()) {
+                            playerHandler.postDelayed(this, 500);
+                        }
                     } catch (IllegalStateException e) {
-                        Log.e(TAG, "Error updating seek bar, MediaPlayer might be in an invalid state: " + e.getMessage());
+                        playerHandler.removeCallbacksAndMessages(null);
                     }
                 } else {
-                    Log.d(TAG, "Stopping seek bar update. Player state valid: " + (mediaPlayer != null) + ", isPlaying: " + isPlaying + ", isAdded: " + isAdded());
+                    playerHandler.removeCallbacksAndMessages(null);
                 }
             }
-        }, 0);
+        });
     }
 
     private String formatTime(int millis) {
-        int minutes = (millis / 1000) / 60;
+        if (millis < 0) millis = 0;
         int seconds = (millis / 1000) % 60;
+        int minutes = (millis / (1000 * 60)) % 60;
         return String.format(Locale.getDefault(), "%02d:%02d", minutes, seconds);
     }
 
     private void stopMusic() {
-        Log.d(TAG, "stopMusic called.");
-        isPreparingMediaPlayer = false;
-        currentPreparingUrl = null;
         if (mediaPlayer != null) {
             try {
                 if (mediaPlayer.isPlaying()) {
@@ -721,29 +643,22 @@ public class SearchFragment extends Fragment implements SongAdapter.OnSongClickL
                 }
                 mediaPlayer.reset();
             } catch (IllegalStateException e) {
-                Log.e(TAG, "IllegalStateException during stop/reset of MediaPlayer: " + e.getMessage());
+                releasePlayer();
+                return;
             }
-            mediaPlayer = null;
         }
         isPlaying = false;
-
+        isPreparingMediaPlayer = false;
         if (playButton != null) {
             playButton.setIconResource(R.drawable.ic_play);
-            playButton.setEnabled(true);
         }
-        if (nextBtn != null) nextBtn.setEnabled(true);
-        if (previousBtn != null) previousBtn.setEnabled(true);
-        if (handler != null) {
-            handler.removeCallbacksAndMessages(null);
+        if (playerHandler != null) {
+            playerHandler.removeCallbacksAndMessages(null);
         }
-        if (seekBar != null) seekBar.setValue(0);
-        if (startTimeTextView != null) startTimeTextView.setText(formatTime(0));
+        setPlayerControlsEnabled(true);
     }
 
     private void releasePlayer() {
-        Log.d(TAG, "releasePlayer called.");
-        isPreparingMediaPlayer = false;
-        currentPreparingUrl = null;
         if (mediaPlayer != null) {
             try {
                 if (mediaPlayer.isPlaying()) {
@@ -751,22 +666,22 @@ public class SearchFragment extends Fragment implements SongAdapter.OnSongClickL
                 }
                 mediaPlayer.reset();
                 mediaPlayer.release();
-                Log.d(TAG, "MediaPlayer released.");
             } catch (Exception e) {
-                Log.e(TAG, "Exception during MediaPlayer release: " + e.getMessage());
+                // Log error
             }
             mediaPlayer = null;
         }
         isPlaying = false;
-        if (playButton != null) {
-            playButton.setIconResource(R.drawable.ic_play);
-            playButton.setEnabled(true);
+        isPreparingMediaPlayer = false;
+        if (isAdded()) { // Chỉ cập nhật UI nếu fragment còn attached
+            if (playButton != null) playButton.setIconResource(R.drawable.ic_play);
+            if (seekBar != null) seekBar.setValue(0);
+            if (startTimeTextView != null) startTimeTextView.setText(formatTime(0));
+            if (endTimeTextView != null) endTimeTextView.setText(formatTime(0));
+            setPlayerControlsEnabled(true);
         }
-        if (nextBtn != null) nextBtn.setEnabled(true);
-        if (previousBtn != null) previousBtn.setEnabled(true);
-        if (handler != null) {
-            handler.removeCallbacksAndMessages(null);
+        if (playerHandler != null) {
+            playerHandler.removeCallbacksAndMessages(null);
         }
     }
-    // --- KẾT THÚC LOGIC PHÁT NHẠC ---
 }

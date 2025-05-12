@@ -19,6 +19,5 @@ public class SongDTO {
     private int likes;
     private int dislikes;
     private int views;
-
 }
 

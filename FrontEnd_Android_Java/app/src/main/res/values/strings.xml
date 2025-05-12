@@ -1,5 +1,6 @@
 <resources>
     <string name="app_name">MusicApp</string>
+
     <string name="form_register">Đăng ký tài khoản</string>
     <string name="form_register_username">Tên người dùng</string>
     <string name="form_register_email">Email</string>
@@ -31,12 +32,10 @@
     <string name="song_s_details">Song\'s details</string>
     <string name="add_playlist">Add Playlist</string>
     <string name="trending_artists">Trending artists</string>
-
     <string name="trending_music_title">Trending Music</string>
-    <string name="search_results_for">Kết quả cho \'%1$s\'</string>
-    <string name="no_trending_songs">Không có bài hát trending</string>
+    <string name="search_results_for">Kết quả cho \'%1$s\'</string> <string name="no_trending_songs">Không có bài hát trending</string>
     <string name="no_search_results">Không tìm thấy kết quả nào</string>
-    <string name="error_load_trending">Lỗi tải bài hát trending</string>
+    <string name="no_songs_available">Không có bài hát nào</string> <string name="error_load_trending">Lỗi tải bài hát trending</string>
     <string name="error_network_trending">Lỗi mạng khi tải trending</string>
     <string name="error_search">Lỗi tìm kiếm</string>
     <string name="error_network_search">Lỗi mạng khi tìm kiếm</string>
@@ -46,6 +45,7 @@
     <string name="error_start_playback">Lỗi khi bắt đầu phát nhạc</string>
     <string name="error_playback_unknown">Lỗi không xác định khi phát nhạc</string>
     <string name="error_load_song">Lỗi không thể tải bài hát</string>
+
     <string name="default_time">00:00</string>
     <string name="no_song_selected">Chưa chọn bài hát</string>
 
@@ -54,10 +54,12 @@
     <string name="desc_previous_button">Bài trước đó</string>
     <string name="desc_song_progress">Thanh trượt tiến độ bài hát</string>
     <string name="desc_song_list">Danh sách bài hát</string>
+
     <string name="search_type_prompt">Tìm kiếm theo:</string>
     <string name="search_type_title">Tên bài hát</string>
     <string name="search_type_artist">Tên nghệ sĩ</string>
     <string name="cancel">Hủy</string>
+
     <string name="hello_blank_fragment">Hello blank fragment</string>
 
 </resources>
