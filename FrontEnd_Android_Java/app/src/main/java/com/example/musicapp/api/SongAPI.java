@@ -1,6 +1,7 @@
 // SongAPI.java
 package com.example.musicapp.api;
 
+import com.example.musicapp.dto.PagedResponseDTO;
 import com.example.musicapp.dto.SongDTO;
 import com.example.musicapp.dto.SongRatingResponseDTO;
 
@@ -10,6 +11,7 @@ import retrofit2.Call;
 import retrofit2.http.GET;
 import retrofit2.http.PUT;
 import retrofit2.http.Path;
+import retrofit2.http.Query;
 
 public interface SongAPI {
     @GET("/song")
@@ -29,4 +31,13 @@ public interface SongAPI {
 
     @GET("/song/{id}/rating")
     Call<SongRatingResponseDTO> getUserRatingForSong(@Path("id") Long songId);
+
+    @GET("/song/search")
+    Call<PagedResponseDTO<SongDTO>> searchSongs(
+            @Query("keyword") String keyword,
+            @Query("mode") String mode,
+            @Query("page") int page,
+            @Query("size") int size
+    );
+
 }

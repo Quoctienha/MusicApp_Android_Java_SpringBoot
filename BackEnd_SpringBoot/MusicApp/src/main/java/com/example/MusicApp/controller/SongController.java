@@ -63,7 +63,7 @@ public class SongController {
             @RequestParam String keyword,
             @RequestParam(defaultValue = "both") String mode,
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size) {
+            @RequestParam(defaultValue = "2") int size) {
 
         Page<SongDTO> songPage = songService.searchSongs(keyword, mode, page, size);
 
@@ -75,5 +75,8 @@ public class SongController {
                 songPage.isLast()
         );
     }
+
+
+
 
 }
