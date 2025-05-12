@@ -29,7 +29,7 @@ import com.example.musicapp.ultis.RetrofitService;
 public class EditProfileFragment extends Fragment {
 
     private EditText edtFullName, edtPhone;
-    private Button   btnSave;
+    private Button   btnSave, btnCancel;
 
     @Nullable
     @Override
@@ -44,11 +44,16 @@ public class EditProfileFragment extends Fragment {
         edtFullName = v.findViewById(R.id.edt_fullname);
         edtPhone    = v.findViewById(R.id.edt_phone);
         btnSave     = v.findViewById(R.id.btn_save_profile);
+        btnCancel = v.findViewById(R.id.btn_cancel_profile);
 
         // restrict phone field to digits only
         edtPhone.setKeyListener(DigitsKeyListener.getInstance("0123456789"));
 
         btnSave.setOnClickListener(x -> save());
+        btnCancel.setOnClickListener(x -> {
+            // simply go back without saving
+            requireActivity().getSupportFragmentManager().popBackStack();
+        });
     }
 
     /* ---------------- save logic ---------------- */

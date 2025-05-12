@@ -58,7 +58,7 @@ public class HomeActivity extends AppCompatActivity {
                         if (id == R.id.nav_home) {
                             selectedFragment = new HomeFragment();
                         } else if (id == R.id.nav_profile) {
-                            selectedFragment = new ProfileFragment();   // ← no args
+                            selectedFragment = new ProfileFragment();
                         } else if (id == R.id.nav_premium) {
                             selectedFragment = new PremiumFragment();
                         } else if (id == R.id.nav_subscribed) {

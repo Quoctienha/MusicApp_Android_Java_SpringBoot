@@ -14,14 +14,14 @@
 <body>
 <div class="email-container">
     <div class="email-header">
-        <p>Chào <span th:text="${username}">User</span>,</p>
+        <p>Hello <span th:text="${username}">User</span>,</p>
     </div>
     <div class="email-body">
-        <p>Vui lòng xác thực tài khoản của bạn bằng cách nhấn vào liên kết dưới đây trong vòng 5 phút:</p>
-        <p><a th:href="${link}" class="button">Xác thực tài khoản</a></p>
+        <p>Please verify your account by clicking the link below within 5 minutes:</p>
+        <p><a th:href="${link}" class="button">Verify Account</a></p>
     </div>
     <div class="email-footer">
-        <p>Nếu không phải bạn yêu cầu, vui lòng bỏ qua.</p>
+        <p>If you did not request this, please ignore it.</p>
     </div>
 </div>
 </body>

@@ -25,7 +25,7 @@ public class PremiumFragment extends Fragment
         btnTryPremium.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Toast.makeText(getContext(), "Đã nhấn nút dùng thử Premium!", Toast.LENGTH_SHORT).show();
+                Toast.makeText(getContext(), "Press the button to try Premium for free!", Toast.LENGTH_SHORT).show();
             }
         });
 

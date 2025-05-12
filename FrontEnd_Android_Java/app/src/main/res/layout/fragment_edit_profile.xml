@@ -5,29 +5,38 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <!-- Full‑name input -->
+    <!-- Full name -->
     <EditText
         android:id="@+id/edt_fullname"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:hint="Full Name"
-        android:textColorHint="#FFFFFF"
-        android:textColor="#FFFFFF" />
-    <!-- Phone input -->
+        android:textColor="#FFFFFF"
+        android:textColorHint="#FFFFFF"/>
+
+    <!-- Phone -->
     <EditText
         android:id="@+id/edt_phone"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:hint="Phone"
         android:inputType="phone"
-        android:textColorHint="#FFFFFF"
-        android:textColor="#FFFFFF" />
+        android:textColor="#FFFFFF"
+        android:textColorHint="#FFFFFF"/>
 
-    <!-- Save button -->
+    <!-- Save -->
     <Button
         android:id="@+id/btn_save_profile"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
-        android:text="Save" />
+        android:text="Save"/>
+
+    <!-- Cancel -->
+    <Button
+        android:id="@+id/btn_cancel_profile"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:text="Cancel"/>
 </LinearLayout>

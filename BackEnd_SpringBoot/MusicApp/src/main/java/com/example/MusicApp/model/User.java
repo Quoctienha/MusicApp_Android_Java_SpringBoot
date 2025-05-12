@@ -14,7 +14,6 @@ public class User {
     private Long id;
     private String fullName;
     private String phone;
-
     // mapping với Account
     @JsonIgnore
     @OneToOne(mappedBy = "user")

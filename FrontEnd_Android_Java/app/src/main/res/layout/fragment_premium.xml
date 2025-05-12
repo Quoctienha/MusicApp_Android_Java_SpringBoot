@@ -19,7 +19,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Mua Gói Premium\nđể nghe nhạc không có\nquảng cáo, không cần\nmạng và cả khi tắt màn\nhình"
+            android:text="Get a Premium plan to listen to music ad-free, offline, and even with the screen turned off"
             android:textSize="24sp"
             android:textColor="#FFFFFF"
             android:textStyle="bold"
@@ -30,7 +30,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Dùng thử 1 tháng với giá 0 đ • Sau đó là\n65.000 đ/tháng • Không bao gồm thuế\nGTGT • Hủy bất cứ lúc nào"
+            android:text="Free for the first month • Then 65,000 ₫/month • VAT not included • Cancel anytime"
             android:textSize="16sp"
             android:textColor="#BBBBBB"
             android:gravity="center"
@@ -42,7 +42,7 @@
             android:id="@+id/btn_try_premium"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Dùng thử 1 tháng với giá 0 đ"
+            android:text="Try it for 1 month for FREE"
             android:textSize="16sp"
             android:background="@drawable/premium_button_background"
             android:backgroundTint="#007AFF"
@@ -55,7 +55,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Hoặc tiết kiệm tiền bằng gói dành cho gia đình hoặc sinh viên"
+            android:text="Or save money with a Family or Student plan."
             android:textSize="12sp"
             android:textColor="#BBBBBB"
             android:gravity="center" />

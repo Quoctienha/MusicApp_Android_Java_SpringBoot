@@ -83,14 +83,14 @@ public class PlaylistSongAdapter extends RecyclerView.Adapter<PlaylistSongAdapte
                 if (response.isSuccessful() && response.body() != null) {
                     String userRating = response.body().getRating();
                     if ("like".equals(userRating)) {
-                        holder.likeButton.setImageResource(R.drawable.ic_like_filled); // Icon đầy
-                        holder.dislikeButton.setImageResource(R.drawable.ic_dislike_empty); // Icon trống
+                        holder.likeButton.setImageResource(R.drawable.ic_like_filled);
+                        holder.dislikeButton.setImageResource(R.drawable.ic_dislike_empty);
                     } else if ("dislike".equals(userRating)) {
-                        holder.likeButton.setImageResource(R.drawable.ic_like_empty); // Icon trống
-                        holder.dislikeButton.setImageResource(R.drawable.ic_dislike_filled); // Icon đầy
+                        holder.likeButton.setImageResource(R.drawable.ic_like_empty);
+                        holder.dislikeButton.setImageResource(R.drawable.ic_dislike_filled);
                     } else {
-                        holder.likeButton.setImageResource(R.drawable.ic_like_empty); // Icon trống
-                        holder.dislikeButton.setImageResource(R.drawable.ic_dislike_empty); // Icon trống
+                        holder.likeButton.setImageResource(R.drawable.ic_like_empty);
+                        holder.dislikeButton.setImageResource(R.drawable.ic_dislike_empty);
                     }
                 } else {
                     Log.e("SongAdapter", "getUserRating failed: " + response.code() + ", " + response.message());

@@ -10,11 +10,11 @@
 </head>
 <body>
 <div class="container">
-  <p>Xin chào <span th:text="${username}">User</span>,</p>
-  <p>Bạn đã yêu cầu đặt lại mật khẩu. Dưới đây là mã xác thực của bạn:</p>
+  <p>Hello <span th:text="${username}">User</span>,</p>
+  <p>You have requested a password reset. Here is your verification code:</p>
   <div class="code" th:text="${code}">123456</div>
-  <p>Mã sẽ hết hạn sau 5 phút.</p>
-  <p>Nếu bạn không thực hiện yêu cầu này, vui lòng bỏ qua email.</p>
+  <p>The code will expire in 5 minutes.</p>
+  <p>If you did not make this request, please ignore this email.</p>
 </div>
 </body>
 </html>

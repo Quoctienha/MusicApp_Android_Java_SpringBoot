@@ -32,7 +32,7 @@ import com.example.musicapp.ultis.RetrofitService;
 
 public class ProfileFragment extends Fragment {
 
-    private TextView tvUsername, tvEmail, tvFullName, tvPhone;
+    private TextView tvUsername, tvEmail, tvFullName, tvPhone , tvMembership;
     // If you add these to XML:
     // private TextView tvFullName, tvPhone;
 
@@ -54,6 +54,7 @@ public class ProfileFragment extends Fragment {
         tvEmail    = v.findViewById(R.id.tvEmail);
         tvFullName = v.findViewById(R.id.tvFullName);
         tvPhone    = v.findViewById(R.id.tvPhone);
+        tvMembership = v.findViewById(R.id.tvMembership);
 
         setupList(v);
         loadProfile();                       // first fetch
@@ -128,6 +129,8 @@ public class ProfileFragment extends Fragment {
                         tvFullName.setVisibility(View.GONE);
                         tvPhone   .setVisibility(View.GONE);
                     }
+                    tvMembership.setText(d.getMembership());
+
                 } else {
                     Log.e("Profile", "GET /profile failed " + r.code());
                 }

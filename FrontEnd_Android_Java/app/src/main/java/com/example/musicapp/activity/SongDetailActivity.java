@@ -15,7 +15,7 @@ import java.util.Locale;
 
 public class SongDetailActivity extends AppCompatActivity {
 
-    @SuppressLint("SetTextI18n") //bỏ qua cảnh báo của Lint khi bạn thiết lập
+    @SuppressLint("SetTextI18n")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
