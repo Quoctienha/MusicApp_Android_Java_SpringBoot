@@ -8,9 +8,16 @@ import com.example.MusicApp.model.SongRating;
 import com.example.MusicApp.repository.AccountRepository;
 import com.example.MusicApp.repository.SongRatingRepository;
 import com.example.MusicApp.repository.SongRepository;
+import com.example.MusicApp.service.strategy.SearchByArtist;
+import com.example.MusicApp.service.strategy.SearchByTitle;
+import com.example.MusicApp.service.strategy.SearchByTitleOrArtist;
+import com.example.MusicApp.service.strategy.SongSearchContext;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.Data;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
@@ -30,6 +37,11 @@ public class SongService {
 
     @Autowired
     private AccountRepository accountRepository;
+
+    @Autowired private SearchByTitle searchByTitle;
+    @Autowired private SearchByArtist searchByArtist;
+    @Autowired private SearchByTitleOrArtist searchByTitleOrArtist;
+    @Autowired private SongSearchContext searchContext;
 
     public List<SongDTO> getAllSongs() {
         return songRepository.findAll()
@@ -139,6 +151,32 @@ public class SongService {
             song.setViews(song.getViews() + 1);
             songRepository.save(song);
         });
+    }
+
+    public Page<SongDTO> searchSongs(String keyword, String mode, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+
+        switch (mode.toLowerCase()) {
+            case "title" -> searchContext.setStrategy(searchByTitle);
+            case "artist" -> searchContext.setStrategy(searchByArtist);
+            default -> searchContext.setStrategy(searchByTitleOrArtist);
+        }
+
+        Page<Song> resultPage = searchContext.search(keyword, pageable);
+
+        return resultPage.map(song -> new SongDTO(
+                song.getId(),
+                song.getTitle(),
+                song.getArtist() != null ? song.getArtist().getStageName() : "Unknown",
+                song.getFileUrl(),
+                song.getImageUrl(),
+                song.getLyrics(),
+                song.getDescription(),
+                song.getLicense(),
+                song.getLikes(),
+                song.getDislikes(),
+                song.getViews()
+        ));
     }
 
 }
