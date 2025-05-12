@@ -25,6 +25,7 @@
     <string name="password">Password</string>
     <string name="log_in">LOG IN</string>
     <string name="or_with">------- Or With -------</string>
+
     <string name="search_hint">Search songs, artist, album...</string>
     <string name="like">Like</string>
     <string name="dislike">Dislike</string>

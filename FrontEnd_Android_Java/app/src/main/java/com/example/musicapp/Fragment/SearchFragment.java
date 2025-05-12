@@ -1,7 +1,7 @@
 package com.example.musicapp.Fragment;
 
 import android.content.Context;
-import android.content.Intent; // <<--- THÊM IMPORT
+import android.content.Intent;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.os.Bundle;
@@ -21,7 +21,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.widget.SearchView;
 import androidx.fragment.app.Fragment;
-import androidx.localbroadcastmanager.content.LocalBroadcastManager; // <<--- THÊM IMPORT
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -89,6 +89,7 @@ public class SearchFragment extends Fragment implements SongAdapter.OnSongClickL
     private int currentSongIndexInPlayer = -1;
     private boolean isPlaying = false;
     private boolean isPreparingMediaPlayer = false;
+
 
     public static SearchFragment newInstance(String query) {
         SearchFragment fragment = new SearchFragment();
@@ -355,7 +356,9 @@ public class SearchFragment extends Fragment implements SongAdapter.OnSongClickL
             if (getContext() != null) {
                 songAPI = RetrofitService.getInstance(requireContext()).createService(SongAPI.class);
             } else {
+
                 isLoading = false;
+
                 return;
             }
         }
