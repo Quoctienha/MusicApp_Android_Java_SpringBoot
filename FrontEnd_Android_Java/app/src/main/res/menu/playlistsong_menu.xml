@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item
+        android:id="@+id/menu_song_detail"
+        android:title="@string/song_s_details"
+        android:icon="@drawable/ic_lyrics"
+        app:showAsAction="ifRoom"
+        android:orderInCategory="100" />
+
+    <item
+        android:id="@+id/menu_remove_from_playlist"
+        android:title="Delete"
+        android:icon="@drawable/ic_add_playlist"
+        app:showAsAction="never"
+        android:orderInCategory="200" />
+</menu>

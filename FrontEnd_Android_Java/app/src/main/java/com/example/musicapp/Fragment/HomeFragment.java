@@ -155,6 +155,7 @@ public class HomeFragment extends Fragment {
 
     private void fetchAndUpdateTrendingArtistsData() {
         if (getContext() == null || !isAdded() || getView() == null) return;
+
         RetrofitService retrofitService = RetrofitService.getInstance(requireContext());
         ArtistAPI artistAPI = retrofitService.createService(ArtistAPI.class);
 

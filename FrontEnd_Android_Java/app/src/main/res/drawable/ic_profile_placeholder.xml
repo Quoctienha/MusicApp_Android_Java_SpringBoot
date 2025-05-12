@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="64dp"
+    android:height="64dp"
+    android:viewportWidth="64"
+    android:viewportHeight="64">
+
+
+    <!-- Đầu người -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M32,18
+                          a8,8 0 1,1 -0.001,0Z" />
+
+    <!-- Vai người -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M20,44
+                          c0,-6.6 24,-6.6 24,0
+                          v2H20z" />
+</vector>
