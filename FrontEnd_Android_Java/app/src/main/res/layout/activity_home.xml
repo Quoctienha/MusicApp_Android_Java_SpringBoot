@@ -5,19 +5,49 @@
     android:layout_height="match_parent"
     android:background="@color/black">
 
-    <!-- Thanh tim kiem -->
-    <EditText
-        android:id="@+id/search_bar"
+    <RelativeLayout
+        android:id="@+id/top_bar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_margin="16dp"
-        android:background="@drawable/edit_text_background"
-        android:drawableLeft="@drawable/ic_search"
-        android:drawablePadding="10dp"
-        android:hint="@string/search_hint"
-        android:padding="12dp"
-        android:textColorHint="@color/black"
-        android:textSize="16sp" />
+        android:padding="10dp">
+
+        <!-- Music App Title -->
+        <TextView
+            android:id="@+id/app_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="20dp"
+            android:layout_centerVertical="true"
+            android:text="MusicApp"
+            android:textColor="@color/white"
+            android:textSize="30sp"
+            android:textStyle="bold" />
+
+        <ImageButton
+            android:id="@+id/micro_button"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_toStartOf="@id/search_button"
+            android:layout_centerVertical="true"
+            android:layout_marginEnd="12dp"
+            android:background="@drawable/circular_ripple_background"
+            android:padding="8dp"
+            android:src="@drawable/ic_micro"
+            app:tint="@color/white" />
+
+        <!-- Search Button -->
+        <ImageButton
+            android:id="@+id/search_button"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_alignParentEnd="true"
+            android:layout_centerVertical="true"
+            android:background="@drawable/circular_ripple_background"
+            android:padding="8dp"
+            android:src="@drawable/ic_search"
+            app:tint="@color/white" />
+    </RelativeLayout>
+
 
     <!-- Framelayout de chua Framwork -->
     <FrameLayout
@@ -25,7 +55,7 @@
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_above="@id/bottom_navigation"
-        android:layout_below="@id/search_bar" />
+        android:layout_below="@id/top_bar" />
 
     <!-- Thanh điều hướng dưới cùng -->
     <com.google.android.material.bottomnavigation.BottomNavigationView

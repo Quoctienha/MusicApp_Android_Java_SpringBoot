@@ -2,6 +2,7 @@ package com.example.musicapp.activity;
 
 import android.os.Bundle;
 import android.view.MenuItem;
+import android.widget.ImageButton;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -11,6 +12,7 @@ import com.example.musicapp.Fragment.HomeFragment;
 import com.example.musicapp.Fragment.PlaylistFragment;
 import com.example.musicapp.Fragment.PremiumFragment;
 import com.example.musicapp.Fragment.ProfileFragment;
+import com.example.musicapp.Fragment.SearchFragment;
 import com.example.musicapp.Fragment.SubsciptionFragment;
 import com.example.musicapp.R;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
@@ -34,6 +36,16 @@ public class HomeActivity extends AppCompatActivity {
                     .replace(R.id.fragment_container, new HomeFragment())
                     .commit();
         }
+
+        ImageButton searchButton = findViewById(R.id.search_button);
+        searchButton.setOnClickListener(v -> {
+            getSupportFragmentManager()
+                    .beginTransaction()
+                    .replace(R.id.fragment_container, new SearchFragment())
+                    .addToBackStack(null)
+                    .commit();
+        });
+
 
         bottomNavigationView.setOnItemSelectedListener(
                 new NavigationBarView.OnItemSelectedListener() {
