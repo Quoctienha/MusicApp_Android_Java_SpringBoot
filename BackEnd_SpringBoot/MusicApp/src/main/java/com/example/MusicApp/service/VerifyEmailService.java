@@ -7,6 +7,7 @@ import com.example.MusicApp.repository.VerificationTokenRepository;
 import lombok.Data;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.beans.factory.annotation.Value;
 
 import java.time.LocalDateTime;
 import java.util.Optional;
@@ -25,22 +26,21 @@ public class VerifyEmailService {
     @Autowired
     private MailService mailService;
 
+    @Value("${app.host-url}")
+    private String appHostUrl;
+
     public void sendVerificationEmail(Account account) {
-        String token =  UUID.randomUUID().toString();
+        String token = UUID.randomUUID().toString();
         LocalDateTime expiry = LocalDateTime.now().plusMinutes(5);
-        //tạo token
+
         VerificationToken verificationToken = new VerificationToken();
         verificationToken.setToken(token);
         verificationToken.setExpiryDate(expiry);
         verificationToken.setAccount(account);
         tokenRepo.save(verificationToken);
 
-
-
-        String link = "http://172.16.30.206:8080/api/auth/verify-email?token=" + token;
-
+        String link = appHostUrl + "/api/auth/verify-email?token=" + token;
         String subject = "Verify Music App account";
-
         mailService.send(account.getEmail(), subject, account.getUsername(), link);
     }
 
