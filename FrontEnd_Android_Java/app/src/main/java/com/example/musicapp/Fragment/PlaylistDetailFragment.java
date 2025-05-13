@@ -130,7 +130,7 @@ public class PlaylistDetailFragment extends Fragment {
 
         playButton.setOnClickListener(v -> {
             if (currentSongIndex == -1 || songList == null || songList.isEmpty()) {
-                Toast.makeText(getContext(), "Vui lòng chọn bài hát!", Toast.LENGTH_SHORT).show();
+                Toast.makeText(getContext(), "Please select a song!", Toast.LENGTH_SHORT).show();
                 return;
             }
 

@@ -84,7 +84,7 @@ public class HomeFragment extends Fragment {
                 if (response.isSuccessful() && response.body() != null) {
                     List<ArtistDTO> artistList = response.body();
                     trendingArtistsRecycler.setLayoutManager(
-                            new LinearLayoutManager(getContext(), LinearLayoutManager.VERTICAL, false)); // Dọc
+                            new LinearLayoutManager(getContext(), LinearLayoutManager.VERTICAL, false));
                     trendingArtistsRecycler.setAdapter(new ArtistAdapter(artistList));
                 }
             }

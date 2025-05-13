@@ -35,7 +35,7 @@ public class CustomUserDetailsService implements UserDetailsService {
                 .username(account.getUsername())
                 .password(account.getPassword())
                 .authorities(authorities)
-                .disabled(!account.isEnabled())       // map enabled flag
+                .disabled(!account.isEnabled())
                 .accountExpired(false)
                 .credentialsExpired(false)
                 .accountLocked(false)

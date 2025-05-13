@@ -37,7 +37,7 @@ public class PlaylistFragment extends Fragment implements PlaylistAdapter.OnPlay
         recyclerView = view.findViewById(R.id.playlistRecyclerView);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
 
-        // Retrofit đã có TokenInterceptor, không cần truyền token thủ công
+        // Retrofit  có TokenInterceptor, không cần truyền token thủ công
         playlistApi = RetrofitService.getInstance(requireContext()).createService(PlaylistAPI.class);
 
         adapter = new PlaylistAdapter(playlistList, this);
@@ -53,7 +53,7 @@ public class PlaylistFragment extends Fragment implements PlaylistAdapter.OnPlay
     @Override
     public void onPlaylistClick(PlaylistDTO playlist) {
         Bundle bundle = new Bundle();
-        bundle.putLong("playlistId", playlist.getId());  // hoặc dùng putString nếu ID là chuỗi
+        bundle.putLong("playlistId", playlist.getId());
 
         Fragment playlistDetailFragment = new PlaylistDetailFragment();
         playlistDetailFragment.setArguments(bundle);
@@ -61,7 +61,7 @@ public class PlaylistFragment extends Fragment implements PlaylistAdapter.OnPlay
         requireActivity()
                 .getSupportFragmentManager()
                 .beginTransaction()
-                .replace(R.id.fragment_container, playlistDetailFragment) // fragment_container là ID layout container của Fragment
+                .replace(R.id.fragment_container, playlistDetailFragment)
                 .addToBackStack(null)
                 .commit();
     }
@@ -75,13 +75,13 @@ public class PlaylistFragment extends Fragment implements PlaylistAdapter.OnPlay
                     playlistList.addAll(response.body());
                     adapter.notifyDataSetChanged();
                 } else {
-                    Toast.makeText(getContext(), "Không thể tải playlist", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getContext(), "Unable to get playlist", Toast.LENGTH_SHORT).show();
                 }
             }
 
             @Override
             public void onFailure(Call<List<PlaylistDTO>> call, Throwable t) {
-                Toast.makeText(getContext(), "Lỗi kết nối khi tải playlist", Toast.LENGTH_SHORT).show();
+                Toast.makeText(getContext(), "Error while connecting to playlist", Toast.LENGTH_SHORT).show();
             }
         });
     }
@@ -89,9 +89,9 @@ public class PlaylistFragment extends Fragment implements PlaylistAdapter.OnPlay
     private void showAddDialog() {
         EditText input = new EditText(getContext());
         new AlertDialog.Builder(requireContext())
-                .setTitle("Tên playlist mới")
+                .setTitle("New playlist ")
                 .setView(input)
-                .setPositiveButton("Tạo", (dialog, which) -> {
+                .setPositiveButton("Create", (dialog, which) -> {
                     PlaylistDTO dto = new PlaylistDTO();
                     dto.setName(input.getText().toString());
                     dto.setSongIds(new ArrayList<>());
@@ -102,17 +102,17 @@ public class PlaylistFragment extends Fragment implements PlaylistAdapter.OnPlay
                             if (response.isSuccessful()) {
                                 loadPlaylists();
                             } else {
-                                Toast.makeText(getContext(), "Không thể tạo playlist", Toast.LENGTH_SHORT).show();
+                                Toast.makeText(getContext(), "Unable to create playlist", Toast.LENGTH_SHORT).show();
                             }
                         }
 
                         @Override
                         public void onFailure(Call<PlaylistDTO> call, Throwable t) {
-                            Toast.makeText(getContext(), "Lỗi khi tạo playlist", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(getContext(), "Unable to create playlist", Toast.LENGTH_SHORT).show();
                         }
                     });
                 })
-                .setNegativeButton("Hủy", null)
+                .setNegativeButton("Cancel", null)
                 .show();
     }
 
@@ -122,9 +122,9 @@ public class PlaylistFragment extends Fragment implements PlaylistAdapter.OnPlay
         input.setText(playlist.getName());
 
         new AlertDialog.Builder(requireContext())
-                .setTitle("Đổi tên playlist")
+                .setTitle("Rename playlist")
                 .setView(input)
-                .setPositiveButton("Lưu", (dialog, which) -> {
+                .setPositiveButton("Save", (dialog, which) -> {
                     playlist.setName(input.getText().toString());
 
                     playlistApi.updatePlaylist(playlist.getId(), playlist).enqueue(new Callback<PlaylistDTO>() {
@@ -133,13 +133,13 @@ public class PlaylistFragment extends Fragment implements PlaylistAdapter.OnPlay
                             if (response.isSuccessful()) {
                                 loadPlaylists();
                             } else {
-                                Toast.makeText(getContext(), "Không thể đổi tên", Toast.LENGTH_SHORT).show();
+                                Toast.makeText(getContext(), "Unable to change", Toast.LENGTH_SHORT).show();
                             }
                         }
 
                         @Override
                         public void onFailure(Call<PlaylistDTO> call, Throwable t) {
-                            Toast.makeText(getContext(), "Lỗi khi đổi tên playlist", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(getContext(), "Error while changing playlist's name", Toast.LENGTH_SHORT).show();
                         }
                     });
                 })
@@ -150,26 +150,26 @@ public class PlaylistFragment extends Fragment implements PlaylistAdapter.OnPlay
     @Override
     public void onDelete(PlaylistDTO playlist) {
         new AlertDialog.Builder(requireContext())
-                .setTitle("Xóa playlist")
-                .setMessage("Bạn có chắc muốn xóa?")
-                .setPositiveButton("Xóa", (dialog, which) -> {
+                .setTitle("Delete playlist")
+                .setMessage("Are you sure?")
+                .setPositiveButton("Delete", (dialog, which) -> {
                     playlistApi.deletePlaylist(playlist.getId()).enqueue(new Callback<Void>() {
                         @Override
                         public void onResponse(Call<Void> call, Response<Void> response) {
                             if (response.isSuccessful()) {
                                 loadPlaylists();
                             } else {
-                                Toast.makeText(getContext(), "Không thể xóa playlist", Toast.LENGTH_SHORT).show();
+                                Toast.makeText(getContext(), "Unable to delete playlist", Toast.LENGTH_SHORT).show();
                             }
                         }
 
                         @Override
                         public void onFailure(Call<Void> call, Throwable t) {
-                            Toast.makeText(getContext(), "Lỗi khi xóa playlist", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(getContext(), "Error while deleting playlist", Toast.LENGTH_SHORT).show();
                         }
                     });
                 })
-                .setNegativeButton("Hủy", null)
+                .setNegativeButton("Cancel", null)
                 .show();
     }
 }

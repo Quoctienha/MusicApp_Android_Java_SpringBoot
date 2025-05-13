@@ -92,7 +92,7 @@
                 android:id="@+id/songTitleTextView"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Tên bài hát"
+                android:text="Song name"
                 android:textColor="#FFFFFF"
                 android:textSize="18sp"
                 android:textStyle="bold"

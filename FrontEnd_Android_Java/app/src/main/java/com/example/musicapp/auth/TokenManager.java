@@ -46,7 +46,7 @@ public class TokenManager {
             return expiresAt != null && expiresAt.before(new Date());
         } catch (Exception e) {
             Log.e("JWT", "Invalid token format", e);
-            return true; // Nếu token lỗi định dạng, coi như hết hạn
+            return true;
         }
     }
 }

@@ -18,7 +18,7 @@ public class LogoutService {
 
         accountRepository.findByUsername(username)
                 .ifPresent(account -> {
-                    account.setRefreshToken(null); // xoá refresh token
+                    account.setRefreshToken(null);
                     accountRepository.save(account);
                 });
     }

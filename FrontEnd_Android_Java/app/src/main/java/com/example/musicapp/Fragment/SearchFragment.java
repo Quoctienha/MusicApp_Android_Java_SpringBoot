@@ -202,7 +202,7 @@ public class SearchFragment extends Fragment {
             public void onFailure(@NonNull Call<PagedResponseDTO<SongDTO>> call, @NonNull Throwable t) {
                 isLoading = false;
                 adapter.showLoading(false);
-                Toast.makeText(getContext(), "Lỗi: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+                Toast.makeText(getContext(), "Error: " + t.getMessage(), Toast.LENGTH_SHORT).show();
             }
         });
     }

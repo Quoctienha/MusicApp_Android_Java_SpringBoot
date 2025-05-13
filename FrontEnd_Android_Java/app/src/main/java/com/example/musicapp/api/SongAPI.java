@@ -14,25 +14,25 @@ import retrofit2.http.Path;
 import retrofit2.http.Query;
 
 public interface SongAPI {
-    @GET("/song")
+    @GET("/api/song")
     Call<List<SongDTO>> getAllSongs();
 
-    @GET("/song/trending")
+    @GET("/api/song/trending")
     Call<List<SongDTO>> getTop10Songs();
 
-    @PUT("/song/{id}/like")
+    @PUT("/api/song/{id}/like")
     Call<SongRatingResponseDTO> likeSong(@Path("id") Long songId);
 
-    @PUT("/song/{id}/dislike")
+    @PUT("/api/song/{id}/dislike")
     Call<SongRatingResponseDTO> dislikeSong(@Path("id") Long songId);
 
-    @PUT("/song/{id}/view")
+    @PUT("/api/song/{id}/view")
     Call<Void> incrementView(@Path("id") Long songId);
 
-    @GET("/song/{id}/rating")
+    @GET("/api/song/{id}/rating")
     Call<SongRatingResponseDTO> getUserRatingForSong(@Path("id") Long songId);
 
-    @GET("/song/search")
+    @GET("/api/song/search")
     Call<PagedResponseDTO<SongDTO>> searchSongs(
             @Query("keyword") String keyword,
             @Query("mode") String mode,

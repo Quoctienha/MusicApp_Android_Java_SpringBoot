@@ -9,9 +9,9 @@ import retrofit2.http.PUT;
 
 public interface UserAPI {
 
-    @GET("api/user/get-profile")            // <-- new path
+    @GET("/api/user/get-profile")
     Call<UserProfileResponseDTO> getProfile();
 
-    @PUT("api/user/edit-profile")           // <-- new path
+    @PUT("/api/user/edit-profile")
     Call<Void> updateProfile(@Body EditProfileRequestDTO dto);
 }

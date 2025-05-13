@@ -47,17 +47,17 @@ public class RegisterCommand implements Command {
                         );
                         navigateCommand.execute();
                     } else {
-                        Toast.makeText(context, "Đăng ký thất bại: " + registerResponse.getMessage(), Toast.LENGTH_SHORT).show();
+                        Toast.makeText(context, "Fail to register: " + registerResponse.getMessage(), Toast.LENGTH_SHORT).show();
                     }
                 } else {
-                    Toast.makeText(context, "Đăng ký thất bại: Phản hồi rỗng từ server!", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(context, "Fail to register: Nill response from server", Toast.LENGTH_SHORT).show();
                 }
             }
 
             @Override
             public void onFailure(@NonNull Call<RegisterResponseDTO> call, @NonNull Throwable t) {
-                Toast.makeText(context, "Không thể kết nối server: " + t.getMessage(), Toast.LENGTH_SHORT).show();
-                Logger.getLogger(RegisterCommand.class.getName()).log(Level.SEVERE, "Lỗi xuất hiện: ", t);
+                Toast.makeText(context, "Unable to connect to server " + t.getMessage(), Toast.LENGTH_SHORT).show();
+                Logger.getLogger(RegisterCommand.class.getName()).log(Level.SEVERE, "Error: ", t);
             }
         });
     }

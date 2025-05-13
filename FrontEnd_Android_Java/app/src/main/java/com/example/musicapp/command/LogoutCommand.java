@@ -61,7 +61,7 @@ public class LogoutCommand implements Command {
 
     }
     private void finishLogout() {
-        tokenManager.clear(); // Xoá token local
-        navigateToLogin.execute(); // Chuyển hướng người dùng về màn hình login
+        tokenManager.clear();
+        navigateToLogin.execute();
     }
 }

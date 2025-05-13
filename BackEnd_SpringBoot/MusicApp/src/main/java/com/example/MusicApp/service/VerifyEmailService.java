@@ -37,9 +37,9 @@ public class VerifyEmailService {
 
 
 
-        String link = "http://192.168.0.17:8080/api/auth/verify-email?token=" + token;
+        String link = "http://172.16.30.206:8080/api/auth/verify-email?token=" + token;
 
-        String subject = "Xác thực tài khoản Music App";
+        String subject = "Verify Music App account";
 
         mailService.send(account.getEmail(), subject, account.getUsername(), link);
     }
@@ -49,7 +49,7 @@ public class VerifyEmailService {
         Optional<VerificationToken> optionalToken = tokenRepo.findByToken(token);
 
         if (optionalToken.isEmpty()) {
-            return false; // Không tìm thấy token thì trả về false
+            return false;
         }
 
         VerificationToken vt = optionalToken.get();

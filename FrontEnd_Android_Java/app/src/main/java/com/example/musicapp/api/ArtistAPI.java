@@ -8,6 +8,6 @@ import retrofit2.Call;
 import retrofit2.http.GET;
 
 public interface ArtistAPI {
-    @GET("/artist/top")
+    @GET("/api/artist/top")
     Call<List<ArtistDTO>> getTopArtists();
 }

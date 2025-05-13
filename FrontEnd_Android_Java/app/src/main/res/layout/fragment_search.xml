@@ -20,7 +20,7 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:layout_marginStart="8dp"
-            android:hint="Tìm bài hát, nghệ sĩ..."
+            android:hint="Search"
             android:drawableStart="@drawable/ic_search"
             android:drawablePadding="10dp"
             android:padding="12dp"
