@@ -10,29 +10,29 @@ import retrofit2.http.*;
 
 public interface PlaylistAPI {
 
-    @GET("playlists")
+    @GET("/api/playlists")
     Call<List<PlaylistDTO>> getAllPlaylists();
 
-    @GET("playlists/{playlistId}/songs")
+    @GET("/api/playlists/{playlistId}/songs")
     Call<List<SongDTO>> getSongsInPlaylist(@Path("playlistId") Long playlistId);
 
-    @PUT("/playlists/{playlistId}/add-song/{songId}")
+    @PUT("/api/playlists/{playlistId}/add-song/{songId}")
     Call<PlaylistDTO> addSongToPlaylist(@Path("playlistId") Long playlistId, @Path("songId") Long songId);
 
-    @PUT("playlists/{playlistId}/remove-song/{songId}")
+    @PUT("/api/playlists/{playlistId}/remove-song/{songId}")
     Call<PlaylistDTO> removeSongFromPlaylist(@Path("playlistId") Long playlistId, @Path("songId") Long songId);
 
 
-    @POST("playlists")
+    @POST("/api/playlists")
     Call<PlaylistDTO> createPlaylist(@Body PlaylistDTO playlistDTO);
 
-    @PUT("playlists/{id}")
+    @PUT("/api/playlists/{id}")
     Call<PlaylistDTO> updatePlaylist(@Path("id") Long id, @Body PlaylistDTO playlistDTO);
 
-    @DELETE("playlists/{id}")
+    @DELETE("/api/playlists/{id}")
     Call<Void> deletePlaylist(@Path("id") Long id);
 
-    @GET("playlists/{id}")
+    @GET("/api/playlists/{id}")
     Call<PlaylistDTO> getPlaylistById(@Path("id") long id);
 
 }

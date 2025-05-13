@@ -29,7 +29,7 @@ import com.example.musicapp.ultis.RetrofitService;
 public class EditProfileFragment extends Fragment {
 
     private EditText edtFullName, edtPhone;
-    private Button   btnSave;
+    private Button   btnSave, btnCancel;
 
     @Nullable
     @Override
@@ -44,14 +44,19 @@ public class EditProfileFragment extends Fragment {
         edtFullName = v.findViewById(R.id.edt_fullname);
         edtPhone    = v.findViewById(R.id.edt_phone);
         btnSave     = v.findViewById(R.id.btn_save_profile);
+        btnCancel = v.findViewById(R.id.btn_cancel_profile);
 
         // restrict phone field to digits only
         edtPhone.setKeyListener(DigitsKeyListener.getInstance("0123456789"));
 
         btnSave.setOnClickListener(x -> save());
+        btnCancel.setOnClickListener(x -> {
+            // simply go back without saving
+            requireActivity().getSupportFragmentManager().popBackStack();
+        });
     }
 
-    /* ---------------- save logic ---------------- */
+    //save logic
 
     private void save() {
         String name  = edtFullName.getText().toString().trim();
@@ -70,14 +75,14 @@ public class EditProfileFragment extends Fragment {
             return;
         }
 
-        // 1️⃣  Shared Retrofit service (token auto-added by interceptor)
+        // Retrofit service
         UserAPI api = RetrofitService
                 .getInstance(requireContext())
                 .createService(UserAPI.class);
 
         EditProfileRequestDTO req = new EditProfileRequestDTO(name, phone);
 
-        // 2️⃣  Call PUT /api/user/profile without header arg
+
         api.updateProfile(req).enqueue(new Callback<Void>() {
             @Override public void onResponse(Call<Void> c, Response<Void> r) {
                 if (r.isSuccessful()) {
@@ -93,13 +98,13 @@ public class EditProfileFragment extends Fragment {
         });
     }
 
-    /* ---------------- validation helper ---------------- */
+    // validation helper
 
     private boolean isValidPhone(String phone) {
         // exactly 10 digits
         return phone != null && phone.matches("^\\d{10}$");
     }
-    /** Returns true if the name contains ONLY letters and spaces (no digits, no punctuation). */
+
     private boolean isValidFullName(String name) {
         return name != null && name.matches("^[A-Za-zÀ-ÖØ-öø-ÿ\\s]+$");
     }

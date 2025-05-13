@@ -22,5 +22,5 @@ public class SongRating {
     @JoinColumn(name = "song_id", nullable = false)
     private Song song;
 
-    private Boolean liked; // true = like, false = dislike
+    private Boolean liked;
 }

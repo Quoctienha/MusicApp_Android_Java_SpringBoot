@@ -32,11 +32,11 @@ import com.example.musicapp.ultis.RetrofitService;
 
 public class ProfileFragment extends Fragment {
 
-    private TextView tvUsername, tvEmail, tvFullName, tvPhone;
+    private TextView tvUsername, tvEmail, tvFullName, tvPhone , tvMembership;
     // If you add these to XML:
     // private TextView tvFullName, tvPhone;
 
-    /* ---------------- lifecycle ---------------- */
+    // lifecycle
 
     @Nullable
     @Override
@@ -54,17 +54,18 @@ public class ProfileFragment extends Fragment {
         tvEmail    = v.findViewById(R.id.tvEmail);
         tvFullName = v.findViewById(R.id.tvFullName);
         tvPhone    = v.findViewById(R.id.tvPhone);
+        tvMembership = v.findViewById(R.id.tvMembership);
 
         setupList(v);
-        loadProfile();                       // first fetch
+        loadProfile();
     }
 
     @Override public void onResume() {
         super.onResume();
-        loadProfile();                       // refresh after editing
+        loadProfile();
     }
 
-    /* ---------------- list & navigation ---------------- */
+    // list & navigation -
 
     private void setupList(View root) {
         ListView list = root.findViewById(R.id.profile_options_list);
@@ -74,8 +75,8 @@ public class ProfileFragment extends Fragment {
 
         ArrayAdapter<String> adapter = new ArrayAdapter<>(
                 requireContext(),
-                R.layout.list_item_profile,   // ← our custom row
-                R.id.text1,                   // id inside that layout
+                R.layout.list_item_profile,
+                R.id.text1,
                 opts);
         list.setAdapter(adapter);
 
@@ -94,16 +95,16 @@ public class ProfileFragment extends Fragment {
     }
 
 
-    /* ---------------- networking ---------------- */
+    // networking
 
     private void loadProfile() {
 
-        // 1️⃣  Create the shared Retrofit service (no token needed)
+        // shared Retrofit service
         UserAPI api = RetrofitService
                 .getInstance(requireContext())
                 .createService(UserAPI.class);
 
-        // 2️⃣  Call GET /api/user/profile with NO header arg
+
         api.getProfile().enqueue(new Callback<UserProfileResponseDTO>() {
             @Override public void onResponse(Call<UserProfileResponseDTO> c,
                                              Response<UserProfileResponseDTO> r) {
@@ -128,6 +129,8 @@ public class ProfileFragment extends Fragment {
                         tvFullName.setVisibility(View.GONE);
                         tvPhone   .setVisibility(View.GONE);
                     }
+                    tvMembership.setText(d.getMembership());
+
                 } else {
                     Log.e("Profile", "GET /profile failed " + r.code());
                 }
@@ -137,7 +140,7 @@ public class ProfileFragment extends Fragment {
             }
         });
     }
-    /* ---------------- logout ---------------- */
+    // logout
 
     private void showLogoutDialog() {
         Dialog dlg = new Dialog(requireContext());

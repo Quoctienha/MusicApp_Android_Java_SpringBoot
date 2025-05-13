@@ -31,7 +31,7 @@ public class TokenAuthenticator implements Authenticator {
     public TokenAuthenticator(TokenManager tokenManager, Retrofit retrofit, Context context) {
         this.tokenManager = tokenManager;
         this.loginAPI = retrofit.create(LoginAPI.class);
-        this.context = context.getApplicationContext(); // Sử dụng ApplicationContext để tránh rò rỉ bộ nhớ
+        this.context = context.getApplicationContext();
     }
 
     @Override
@@ -81,7 +81,7 @@ public class TokenAuthenticator implements Authenticator {
                     return null;
                 }
             } else {
-                // Token đã được cập nhật bởi thread khác → retry với token mới
+                // Token đã được cập nhật bởi thread khác nên retry với token mới
                 return response.request().newBuilder()
                         .header("Authorization", "Bearer " + tokenManager.getAccessToken())
                         .build();

@@ -54,9 +54,9 @@ public class JwtService {
                     .getBody();
             return claims.getSubject();
         } catch (ExpiredJwtException ex) {
-            return ex.getClaims().getSubject(); // Token hết hạn vẫn lấy được username
+            return ex.getClaims().getSubject();
         } catch (JwtException e) {
-            return null; // Token không hợp lệ
+            return null;
         }
     }
 
@@ -85,7 +85,7 @@ public class JwtService {
             if (shouldBeRefreshToken) {
                 return "refresh".equals(tokenType);
             } else {
-                return tokenType == null; // Access token không có tokenType hoặc tokenType != "refresh"
+                return tokenType == null;
             }
         } catch (ExpiredJwtException e) {
             // Lỗi khi token hết hạn

@@ -79,14 +79,14 @@ public class SongAdapter extends RecyclerView.Adapter<SongAdapter.SongViewHolder
                 if (response.isSuccessful() && response.body() != null) {
                     String userRating = response.body().getRating();
                     if ("like".equals(userRating)) {
-                        holder.likeButton.setImageResource(R.drawable.ic_like_filled); // Icon đầy
-                        holder.dislikeButton.setImageResource(R.drawable.ic_dislike_empty); // Icon trống
+                        holder.likeButton.setImageResource(R.drawable.ic_like_filled);
+                        holder.dislikeButton.setImageResource(R.drawable.ic_dislike_empty);
                     } else if ("dislike".equals(userRating)) {
-                        holder.likeButton.setImageResource(R.drawable.ic_like_empty); // Icon trống
-                        holder.dislikeButton.setImageResource(R.drawable.ic_dislike_filled); // Icon đầy
+                        holder.likeButton.setImageResource(R.drawable.ic_like_empty);
+                        holder.dislikeButton.setImageResource(R.drawable.ic_dislike_filled);
                     } else {
-                        holder.likeButton.setImageResource(R.drawable.ic_like_empty); // Icon trống
-                        holder.dislikeButton.setImageResource(R.drawable.ic_dislike_empty); // Icon trống
+                        holder.likeButton.setImageResource(R.drawable.ic_like_empty);
+                        holder.dislikeButton.setImageResource(R.drawable.ic_dislike_empty);
                     }
                 } else {
                     Log.e("SongAdapter", "getUserRating failed: " + response.code() + ", " + response.message());
@@ -109,15 +109,8 @@ public class SongAdapter extends RecyclerView.Adapter<SongAdapter.SongViewHolder
             popup.setOnMenuItemClickListener(item -> {
                 int itemId = item.getItemId();
                 if (itemId == R.id.menu_song_detail) {
-                    //Bundle extras = new Bundle();
-                    //extras.putString("title", song.getTitle());
-                    //extras.putString("artist", song.getArtist());
-                    //extras.putString("lyrics", song.getLyrics());
-                    //extras.putString("description", song.getDescription());
-                    //extras.putString("license", song.getLicense());
-
                     Bundle extras = new Bundle();
-                    extras.putSerializable("song", song);  // Truyền đối tượng Song qua Bundle
+                    extras.putSerializable("song", song);
 
                     Command goToSongDetail = new NavigateToActivityCommand(context, SongDetailActivity.class, extras);
                     goToSongDetail.execute();
@@ -139,8 +132,8 @@ public class SongAdapter extends RecyclerView.Adapter<SongAdapter.SongViewHolder
                     if (response.isSuccessful() && response.body() != null) {
                         String userRating = response.body().getRating();
                         if ("Rating updated".equals(userRating)) {
-                            holder.likeButton.setImageResource(R.drawable.ic_like_filled); // Icon đầy
-                            holder.dislikeButton.setImageResource(R.drawable.ic_dislike_empty); // Icon trống
+                            holder.likeButton.setImageResource(R.drawable.ic_like_filled);
+                            holder.dislikeButton.setImageResource(R.drawable.ic_dislike_empty);
                             Toast.makeText(context, "Liked " + song.getTitle(), Toast.LENGTH_SHORT).show();
                         }
                     } else {
@@ -164,8 +157,8 @@ public class SongAdapter extends RecyclerView.Adapter<SongAdapter.SongViewHolder
                     if (response.isSuccessful() && response.body() != null) {
                         String userRating = response.body().getRating();
                         if ("Rating updated".equals(userRating)) {
-                            holder.likeButton.setImageResource(R.drawable.ic_like_empty); // Icon trống
-                            holder.dislikeButton.setImageResource(R.drawable.ic_dislike_filled); // Icon đầy
+                            holder.likeButton.setImageResource(R.drawable.ic_like_empty);
+                            holder.dislikeButton.setImageResource(R.drawable.ic_dislike_filled);
                             Toast.makeText(context, "Disliked " + song.getTitle(), Toast.LENGTH_SHORT).show();
                         }
                     } else {

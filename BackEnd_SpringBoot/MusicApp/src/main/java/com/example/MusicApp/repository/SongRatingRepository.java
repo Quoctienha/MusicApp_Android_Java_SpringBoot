@@ -10,7 +10,7 @@ import java.util.Optional;
 public interface SongRatingRepository extends JpaRepository<SongRating, Long> {
     Optional<SongRating> findByAccountAndSong(Account account, Song song);
 
-    int countBySongAndLikedTrue(Song song);   // Đếm số like
-    int countBySongAndLikedFalse(Song song);  // Đếm số dislike
+    int countBySongAndLikedTrue(Song song);
+    int countBySongAndLikedFalse(Song song);
 }
 

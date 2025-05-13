@@ -5,6 +5,7 @@ public class UserProfileResponseDTO {
     private String email;
     private String fullName;
     private String phone;
+    private String membership;
 
     // getters & setters
     public String getUsername() { return username; }
@@ -18,4 +19,6 @@ public class UserProfileResponseDTO {
 
     public String getPhone() { return phone; }
     public void setPhone(String phone) { this.phone = phone; }
+    public String getMembership() { return membership; }
+    public void setMembership(String membership) { this.membership = membership; }
 }

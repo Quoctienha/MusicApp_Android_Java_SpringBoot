@@ -11,15 +11,15 @@ public class NavigateToActivityCommand implements Command {
     private final int flags;
 
     public NavigateToActivityCommand(Context context, Class<?> targetActivity) {
-        this(context, targetActivity, null, 0);  // Chỉ truyền context và targetActivity nếu không có extras và flags
+        this(context, targetActivity, null, 0);
     }
 
     public NavigateToActivityCommand(Context context, Class<?> targetActivity, Bundle extras) {
-        this(context, targetActivity, extras, 0);  // Trường hợp có extras nhưng không có flags
+        this(context, targetActivity, extras, 0);
     }
 
     public NavigateToActivityCommand(Context context, Class<?> targetActivity, int flags) {
-        this(context, targetActivity, null, flags);  // Trường hợp chỉ có flags
+        this(context, targetActivity, null, flags);
     }
 
     public NavigateToActivityCommand(Context context, Class<?> targetActivity, Bundle extras, int flags) {

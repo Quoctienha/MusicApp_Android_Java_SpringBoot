@@ -2,6 +2,7 @@ package com.example.musicapp.activity;
 
 import android.os.Bundle;
 import android.view.MenuItem;
+import android.widget.ImageButton;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -11,6 +12,7 @@ import com.example.musicapp.Fragment.HomeFragment;
 import com.example.musicapp.Fragment.PlaylistFragment;
 import com.example.musicapp.Fragment.PremiumFragment;
 import com.example.musicapp.Fragment.ProfileFragment;
+import com.example.musicapp.Fragment.SearchFragment;
 import com.example.musicapp.Fragment.SubsciptionFragment;
 import com.example.musicapp.R;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
@@ -35,6 +37,16 @@ public class HomeActivity extends AppCompatActivity {
                     .commit();
         }
 
+        ImageButton searchButton = findViewById(R.id.search_button);
+        searchButton.setOnClickListener(v -> {
+            getSupportFragmentManager()
+                    .beginTransaction()
+                    .replace(R.id.fragment_container, new SearchFragment())
+                    .addToBackStack(null)
+                    .commit();
+        });
+
+
         bottomNavigationView.setOnItemSelectedListener(
                 new NavigationBarView.OnItemSelectedListener() {
                     @Override
@@ -46,7 +58,7 @@ public class HomeActivity extends AppCompatActivity {
                         if (id == R.id.nav_home) {
                             selectedFragment = new HomeFragment();
                         } else if (id == R.id.nav_profile) {
-                            selectedFragment = new ProfileFragment();   // ← no args
+                            selectedFragment = new ProfileFragment();
                         } else if (id == R.id.nav_premium) {
                             selectedFragment = new PremiumFragment();
                         } else if (id == R.id.nav_subscribed) {

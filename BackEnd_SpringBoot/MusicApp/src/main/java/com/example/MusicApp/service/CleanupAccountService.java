@@ -35,7 +35,7 @@ public class CleanupAccountService {
                 }
             }
         } catch (Exception e) {
-            e.printStackTrace(); // or log with a logger
+            e.printStackTrace();
         }
     }
 

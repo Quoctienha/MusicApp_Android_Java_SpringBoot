@@ -9,5 +9,5 @@ public class PasswordResetRequestDTO {
         this.password = password;
     }
 
-    // Getters and setters if needed
+
 }
